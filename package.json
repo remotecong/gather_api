@@ -4,7 +4,7 @@
   "description": "phone and letter territory information gatherer",
   "main": "index.js",
   "scripts": {
-  	"start": "node index",
+  	"start": "node index \"11106 S 108th E Ave, Bixby, OK\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "@dillonchr",

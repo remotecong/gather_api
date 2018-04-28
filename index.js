@@ -1,5 +1,29 @@
 const puppeteer = require('puppeteer');
 const AGREE_BUTTON_SELECTOR = '[name="accepted"].positive';
+const STREET_TYPES = 'Avenue:AV;Boulevard:BV;Circle:CR;Court:CT;Drive:DR;East:E;Expressway:EX;Highway:HY;Lane:LN;North:N;Park:PK;Place:PL;Road:RD;South:S;Street:ST;Terrace:TE;Trail:TL;Way:WY;West:W'.split(';').map(s => {
+    const [name, value] = s.split(':');
+    return {name: name.toLocaleLowerCase(), value};
+});
+const address = process.argv[2];
+
+if (!address) {
+    console.log('Missing address!');
+    process.exit(1);
+}
+
+const assessorPieces = address.split(',').shift().match(/(\d+) ([NSEW]) ([^ ]+) (.*) ([A-Za-z]+)$/);
+
+if (!assessorPieces && assessorPieces.length < 6) {
+    console.log('bad address I guess', assessorPieces);
+    console.log('from', address);
+}
+
+const houseNumber = assessorPieces[1];
+const direction = assessorPieces[2];
+const streetName = assessorPieces[3];
+const streetType = STREET_TYPES.find(t => t.name.includes(assessorPieces[5].toLowerCase())).value;
+
+console.log({number: houseNumber, direction, streetName, streetType});
 
 (async () => {
     const browser = await puppeteer.launch();
@@ -14,15 +38,22 @@ const AGREE_BUTTON_SELECTOR = '[name="accepted"].positive';
         ]);
     }
 
-
-    //  ((address) => {
-    //     const [wholeMatch, number, direction, streetName, ignore, streetType] = address.split(',').shift().match(/(\d+) ([NSEW]) ([^ ]+) (.*) ([A-Za-z]+)$/);
-    //     document.querySelector('#streetno').value = number;
-    //     document.querySelector('[name="predirection"]').value = direction;
-    //     document.querySelector('#streetname').value = streetName;
-    //     document.querySelector('#streettype').value = streetType;
-    //     document.querySelector('#bttnaddr').click();
-    // })('11106 S 108th E Ave');
+    try {
+        await Promise.all([
+            page.waitForNavigation(),
+            page.evaluate(data => {
+                const document = window.document;
+                document.querySelector('#streetno').value = data.houseNumber;
+                document.querySelector('[name="predirection"]').value = data.direction;
+                document.querySelector('#streetname').value = data.streetName;
+                document.querySelector('#streettype').value = data.streetType;
+                document.querySelector('#bttnaddr').click();
+            }, {houseNumber, streetName, streetType, direction})
+        ]);
+    } catch (err) {
+        console.log('Failed to do the search :(');
+        console.log(err);
+    }
 
     // (() => {
     //     const address = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
@@ -36,9 +67,9 @@ const AGREE_BUTTON_SELECTOR = '[name="accepted"].positive';
     //     const lastName = assessorName.split(',').map(s => s.trim()).shift();
     //     return Array.from(document.querySelectorAll('.ThatsThem-people-record.row')).map(result => {
     //         const name = result.querySelector('h2').textContent.trim();
-    //         const number = (result.querySelector('[itemprop="telephone"]') || document.createElement('span')).textContent.trim();
+    //         const houseNumber = (result.querySelector('[itemprop="telephone"]') || document.createElement('span')).textContent.trim();
 
-    //         return {name, number};
+    //         return {name, houseNumber};
     //     }).find(p => p.name.toUpperCase().includes(lastName));
     // })('CHRISTENSEN, JUSTIN D');
 
