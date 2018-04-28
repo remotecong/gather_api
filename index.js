@@ -68,7 +68,7 @@ console.log({number: houseNumber, direction, streetName, streetType});
     await page.goto(thatsThemURL, {timeout: 60000});
 
     try {
-        const phoneData = await page.evaluate(lastName => {
+        const phoneData = await page.evaluate(data => {
             return Array.from(document.querySelectorAll('.ThatsThem-people-record.row'))
                 .map(result => {
                     const name = result.querySelector('h2').textContent.trim();
@@ -76,8 +76,8 @@ console.log({number: houseNumber, direction, streetName, streetType});
                     const isMobile = !!result.querySelector('[data-title="Mobile"] [itemprop="telephone"]');
                     return {name, houseNumber, isMobile};
                 })
-                .filter((p, i, a) => p.name.toUpperCase().includes(lastName) && a.findIndex(ap => ap.houseNumber === p.houseNumber) === i);
-        }, ownerData.lastName);
+                .filter((p, i, a) => (p.name.toUpperCase().includes(data.lastName) || (!data.livesThere && !i)) && a.findIndex(ap => ap.houseNumber === p.houseNumber) === i);
+        }, ownerData);
         console.log('Phone data', phoneData);
     } catch (err) {
         console.log('no thatsthem found :(');
