@@ -54,12 +54,13 @@ console.log({number: houseNumber, direction, streetName, streetType});
         console.log(err);
     }
 
-    const ownerData = await page.evaluate(() => {
+    const ownerData = await page.evaluate(houseNumber => {
         const mailingAddress = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
         const name = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
         const lastName = name.split(',').map(s => s.trim()).shift();
-        return {mailingAddress, name, lastName};
-    });
+        const livesThere = mailingAddress.includes(houseNumber);
+        return {mailingAddress, name, lastName, livesThere};
+    }, houseNumber);
 
     console.log(ownerData);
 
