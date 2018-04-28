@@ -1,0 +1,12 @@
+{
+  "name": "gather",
+  "version": "0.0.0",
+  "description": "phone and letter territory information gatherer",
+  "main": "index.js",
+  "scripts": {
+  	"start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "@dillonchr",
+  "license": "GPL-2.0"
+}
