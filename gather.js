@@ -8,23 +8,19 @@ const STREET_TYPES = 'Avenue:AV;Boulevard:BV;Circle:CR;Court:CT;Drive:DR;East:E;
 
 module.exports = async address => {
     if (!address) {
-        console.log('Missing address!');
-        process.exit(1);
+        return {error: 'missing address'};
     }
 
     const assessorPieces = address.replace(/\./g, '').split(',').shift().match(/(\d+) ([NSEW]) ([^ ]+) (.*) ([A-Za-z]+)$/);
 
     if (!assessorPieces && assessorPieces.length < 6) {
-        console.log('bad address I guess', assessorPieces);
-        console.log('from', address);
+        return {error: 'bad address', input: address, decoded: assessorPieces};
     }
 
     const houseNumber = assessorPieces[1];
     const direction = assessorPieces[2];
     const streetName = assessorPieces[3];
-    const streetType = STREET_TYPES.find(t => t.name.includes(assessorPieces[5].toLowerCase())).value;
-
-    console.log({number: houseNumber, direction, streetName, streetType});
+    const streetType = (STREET_TYPES.find(t => t.name.includes(assessorPieces[5].toLowerCase())) || {value: 'ST'}).value;
 
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -50,8 +46,8 @@ module.exports = async address => {
             }, {houseNumber, streetName, streetType, direction})
         ]);
     } catch (err) {
-        console.log('Failed to do the search :(');
-        console.log(err);
+        console.log('Failed to do the assessor search', err);
+        return {};
     }
 
     const ownerData = await page.evaluate(houseNumber => {
@@ -61,8 +57,6 @@ module.exports = async address => {
         const livesThere = mailingAddress.includes(houseNumber);
         return {mailingAddress, name, lastName, livesThere};
     }, houseNumber);
-
-    console.log(ownerData);
 
     const thatsThemURL = `https://thatsthem.com/address/${address.replace(/\./g, '').replace(/,? /g, '-')}`;
     await page.goto(thatsThemURL, {timeout: 60000});
@@ -81,8 +75,7 @@ module.exports = async address => {
         await browser.close();
         return {...ownerData, phones: phoneData};
     } catch (err) {
-        console.log('no thatsthem found :(');
-        console.log(err);
+        console.log('thatsthem error:', err);
         browser.close();
     }
     return {};
