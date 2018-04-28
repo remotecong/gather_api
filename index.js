@@ -42,7 +42,6 @@ console.log({number: houseNumber, direction, streetName, streetType});
         await Promise.all([
             page.waitForNavigation(),
             page.evaluate(data => {
-                const document = window.document;
                 document.querySelector('#streetno').value = data.houseNumber;
                 document.querySelector('[name="predirection"]').value = data.direction;
                 document.querySelector('#streetname').value = data.streetName;
@@ -55,23 +54,31 @@ console.log({number: houseNumber, direction, streetName, streetType});
         console.log(err);
     }
 
-    // (() => {
-    //     const address = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
-    //     const ownerName = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
-    //     return {address, ownerName};
-    // })();
+    const ownerData = await page.evaluate(() => {
+        const mailingAddress = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
+        const name = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
+        const lastName = name.split(',').map(s => s.trim()).shift();
+        return {mailingAddress, name, lastName};
+    });
 
-    //	GOTO THATSTHEM
+    console.log(ownerData);
 
-    // ((assessorName) => {
-    //     const lastName = assessorName.split(',').map(s => s.trim()).shift();
-    //     return Array.from(document.querySelectorAll('.ThatsThem-people-record.row')).map(result => {
-    //         const name = result.querySelector('h2').textContent.trim();
-    //         const houseNumber = (result.querySelector('[itemprop="telephone"]') || document.createElement('span')).textContent.trim();
+    const thatsThemURL = `https://thatsthem.com/address/${address.replace(/,? /g, '-')}`;
+    await page.goto(thatsThemURL, {timeout: 60000});
 
-    //         return {name, houseNumber};
-    //     }).find(p => p.name.toUpperCase().includes(lastName));
-    // })('CHRISTENSEN, JUSTIN D');
+    try {
+        const phoneData = await page.evaluate(lastName => {
+            return Array.from(document.querySelectorAll('.ThatsThem-people-record.row')).map(result => {
+                const name = result.querySelector('h2').textContent.trim();
+                const houseNumber = (result.querySelector('[itemprop="telephone"]') || document.createElement('span')).textContent.trim();
+                return {name, houseNumber};
+            }).find(p => p.name.toUpperCase().includes(lastName));
+        }, ownerData.lastName);
+        console.log('Phone data', phoneData);
+    } catch (err) {
+        console.log('no thatsthem found :(');
+        console.log(err);
+    }
 
 
     await page.screenshot({path: 'example.png'});
