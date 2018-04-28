@@ -4,7 +4,7 @@ const STREET_TYPES = 'Avenue:AV;Boulevard:BV;Circle:CR;Court:CT;Drive:DR;East:E;
     const [name, value] = s.split(':');
     return {name: name.toLocaleLowerCase(), value};
 });
-const address = process.argv[2];
+const address = process.argv[2].replace(/\./g, '');
 
 if (!address) {
     console.log('Missing address!');
@@ -68,11 +68,14 @@ console.log({number: houseNumber, direction, streetName, streetType});
 
     try {
         const phoneData = await page.evaluate(lastName => {
-            return Array.from(document.querySelectorAll('.ThatsThem-people-record.row')).map(result => {
-                const name = result.querySelector('h2').textContent.trim();
-                const houseNumber = (result.querySelector('[itemprop="telephone"]') || document.createElement('span')).textContent.trim();
-                return {name, houseNumber};
-            }).find(p => p.name.toUpperCase().includes(lastName));
+            return Array.from(document.querySelectorAll('.ThatsThem-people-record.row'))
+                .map(result => {
+                    const name = result.querySelector('h2').textContent.trim();
+                    const houseNumber = (result.querySelector('[itemprop="telephone"]') || document.createElement('span')).textContent.trim();
+                    const isMobile = !!result.querySelector('[data-title="Mobile"] [itemprop="telephone"]');
+                    return {name, houseNumber, isMobile};
+                })
+                .filter((p, i, a) => p.name.toUpperCase().includes(lastName) && a.findIndex(ap => ap.houseNumber === p.houseNumber) === i);
         }, ownerData.lastName);
         console.log('Phone data', phoneData);
     } catch (err) {
