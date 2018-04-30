@@ -25,6 +25,9 @@ http
                         res.writeHead(500);
                         res.end('{}');
                     });
+            } else {
+                res.writeHead(404);
+                res.end('hi');
             }
         }
     })
