@@ -1,14 +1,9 @@
-const https = require('https');
-const fs = require('fs');
+const http = require('http');
 const {parse} = require('url');
 const gather = require('./gather');
 
-https
-    .createServer({
-            key: fs.readFileSync(process.env.SSL_KEY_PATH),
-            cert: fs.readFileSync(process.env.SSL_CERT_PATH)
-        },
-        (req, res) => {
+http
+    .createServer((req, res) => {
             res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
             res.setHeader('Access-Control-Request-Method', '*');
             res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
