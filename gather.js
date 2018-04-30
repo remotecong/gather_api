@@ -1,9 +1,24 @@
 const puppeteer = require('puppeteer');
 const AGREE_BUTTON_SELECTOR = '[name="accepted"].positive';
-const STREET_TYPES = 'Avenue:AV;Boulevard:BV;Circle:CR;Court:CT;Drive:DR;East:E;Expressway:EX;Highway:HY;Lane:LN;North:N;Park:PK;Place:PL;Road:RD;South:S;Street:ST;Terrace:TE;Trail:TL;Way:WY;West:W'.split(';').map(s => {
-    const [name, value] = s.split(':');
-    return {name: name.toLocaleLowerCase(), value};
-});
+const STREET_TYPES = [{"options": ["avenue"], "value": "AV"}, {
+    "options": ["boulevard", "blvd"],
+    "value": "BV"
+}, {"options": ["circle"], "value": "CR"}, {"options": ["court", "ct"], "value": "CT"}, {
+    "options": ["drive"],
+    "value": "DR"
+}, {"options": ["expressway", "expwy"], "value": "EX"}, {
+    "options": ["highway", "hwy"],
+    "value": "HY"
+}, {"options": ["lane", "ln"], "value": "LN"}, {
+    "options": ["park", "pr", "pk"],
+    "value": "PK"
+}, {"options": ["place"], "value": "PL"}, {"options": ["road", "rd"], "value": "RD"}, {
+    "options": ["street"],
+    "value": "ST"
+}, {"options": ["terrace", "tr"], "value": "TE"}, {
+    "options": ["trail", "tl"],
+    "value": "TL"
+}, {"options": ["way", "wy"], "value": "WY"}];
 
 
 module.exports = async address => {
@@ -11,7 +26,8 @@ module.exports = async address => {
         return {error: 'missing address'};
     }
 
-    const assessorPieces = address.replace(/\./g, '').split(',').shift().match(/(\d+) ([NSEW]) ([^ ]+) (.*) ([A-Za-z]+)$/);
+    const assessorAddress = address.replace(/\./g, '').split(',').shift();
+    const assessorPieces = assessorAddress.match(/(\d+) ([NSEW]) ([^ ]+) (.*) ([A-Za-z]+)$/) || assessorAddress.match(/(\d+) ([NSEW]) ([^ ]+) ([^\s]+)$/);
 
     if (!assessorPieces && assessorPieces.length < 6) {
         return {error: 'bad address', input: address, decoded: assessorPieces};
@@ -20,7 +36,10 @@ module.exports = async address => {
     const houseNumber = assessorPieces[1];
     const direction = assessorPieces[2];
     const streetName = assessorPieces[3];
-    const streetType = (STREET_TYPES.find(t => t.name.includes(assessorPieces[5].toLowerCase())) || {value: 'ST'}).value;
+    const streetTypeValue = assessorPieces.pop().toLowerCase();
+    const streetType = (STREET_TYPES.find(t => t.options.includes(streetTypeValue) || t.options.some(o => o.includes(streetTypeValue))) || {value: 'ST'}).value;
+
+    console.log(houseNumber, direction, streetName, streetType);
 
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -66,11 +85,11 @@ module.exports = async address => {
             return Array.from(document.querySelectorAll('.ThatsThem-people-record.row'))
                 .map(result => {
                     const name = result.querySelector('h2').textContent.trim();
-                    const houseNumber = (result.querySelector('[itemprop="telephone"]') || document.createElement('span')).textContent.trim();
+                    const number = (result.querySelector('[itemprop="telephone"]') || document.createElement('span')).textContent.trim();
                     const isMobile = !!result.querySelector('[data-title="Mobile"] [itemprop="telephone"]');
-                    return {name, houseNumber, isMobile};
+                    return {name, number, isMobile};
                 })
-                .filter((p, i, a) => (p.name.toUpperCase().includes(data.lastName) || (!data.livesThere && !i)) && a.findIndex(ap => ap.houseNumber === p.houseNumber) === i);
+                .filter((p, i, a) => !!p.number && (p.name.toUpperCase().includes(data.lastName) || (!data.livesThere && !i)) && a.findIndex(ap => ap.number === p.number) === i);
         }, ownerData);
         await browser.close();
         return {...ownerData, phones: phoneData};

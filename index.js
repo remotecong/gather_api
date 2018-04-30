@@ -4,11 +4,28 @@ const gather = require('./gather');
 
 http
     .createServer((req, res) => {
-        const query = parse(req.url, true).query;
-        if (query && query.address) {
-            gather(process.argv[2])
-                .then(data => res.end(JSON.stringify(data)))
-                .catch(err => res.end('{}'));
+        res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+        res.setHeader('Access-Control-Request-Method', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
+        res.setHeader('Access-Control-Allow-Headers', '*');
+
+        if (req.method === 'OPTIONS') {
+            res.writeHead(200);
+            res.end();
+        } else {
+            const query = parse(req.url, true).query;
+            if (query && query.address) {
+                gather(query.address)
+                    .then(data => {
+                        res.writeHead(200);
+                        res.end(JSON.stringify(data))
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.writeHead(500);
+                        res.end('{}');
+                    });
+            }
         }
     })
     .listen(process.env.PORT || 3000);
