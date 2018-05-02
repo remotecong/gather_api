@@ -1,7 +1,9 @@
 const puppeteer = require('puppeteer');
-const waitUntil = 'domcontentloaded';
-const ASSESSOR_URL = 'http://www.assessor.tulsacounty.org/assessor-property-search.php';
-const AGREE_BUTTON_SELECTOR = '[name="accepted"].positive';
+/**
+ * the available street type values for assessor searches,
+ * some have been left out due to their absurdity (e.g. E, W)
+ * @type {*[]}
+ */
 const STREET_TYPES = [
     {options: ["street"], value: "ST"},
     {options: ["avenue"], value: "AV"},
@@ -20,15 +22,29 @@ const STREET_TYPES = [
     {options: ["way", "wy"], value: "WY"}
 ];
 
-const getOwnerData = async (browser, values) => {
+const openPage = async (browser, url) => {
     const page = await browser.newPage();
-    await page.goto(ASSESSOR_URL, {waitUntil});
+    await page.goto(url, {waitUntil: 'domcontentloaded'});
+    return page;
+};
 
-    const shouldAccept = await page.$(AGREE_BUTTON_SELECTOR);
+/**
+ * runs assessor search for decoded address and returns owner's info which includes:
+ * name - string
+ * lastName - string
+ * livesThere - bool
+ * @param browser - puppeteer
+ * @param values - search values from getAssessorValues
+ * @returns {Promise<*>}
+ */
+const getOwnerData = async (browser, values) => {
+    const page = await openPage(browser, 'http://www.assessor.tulsacounty.org/assessor-property-search.php');
+
+    const shouldAccept = await page.$('[name="accepted"].positive');
     if (shouldAccept) {
         await Promise.all([
             page.waitForNavigation(),
-            page.click(AGREE_BUTTON_SELECTOR)
+            page.click('[name="accepted"].positive')
         ]);
     }
 
@@ -57,28 +73,46 @@ const getOwnerData = async (browser, values) => {
     }, values.houseNumber);
 };
 
+/**
+ * returns assessor required values for running property search
+ * @param address
+ * @returns {*}
+ */
 const getAssessorValues = address => {
-    const assessorAddress = address.replace(/\./g, '').split(',').shift();
-    const assessorPieces = assessorAddress.match(/(\d+) ([NSEW]) ([^ ]+) (.*) ([A-Za-z]+)$/) || assessorAddress.match(/(\d+) ([NSEW]) ([^ ]+) ([^\s]+)$/);
+    //  1234 N Main St, City Name, ST
+    const assessorAddress = address
+        //  ditch everything after the first comma
+        .split(',')
+        //  just give me the street address, we know it's in tulsa
+        .shift()
+        //  strip away all periods (e.g. "S.")
+        .replace(/\./g, '')
+        //  reduce any directional words to be their single character to help me match later
+        .replace(/\sEast\s/ig, ' E ')
+        .replace(/\sNorth\s/ig, ' N ')
+        .replace(/\sSouth\s/ig, ' S ')
+        .replace(/\sWest\s/ig, 'W');
+    //  grab house number, direction, street name, sub-direction (to ignore) and street type
+    const assessorPieces = assessorAddress.match(/(\d+) ([NSEW]) ([^ ]+) ([NSEW]\s)?([A-Za-z]+)$/i);
 
-    if (!assessorPieces || assessorPieces.length < 5) {
-        return {error: `Bad address\nGot ${address}\nDecoded as: ${JSON.stringify(assessorPieces)}`, input: address, decoded: assessorPieces};
+    //  it either works perfectly or not at all
+    if (!assessorPieces || assessorPieces.length < 6) {
+        return {error: `Bad address\nGot ${assessorAddress}\nDecoded as: ${JSON.stringify(assessorPieces)}`, input: address, decoded: assessorPieces};
     }
 
+    //  clean up pieces with names
     const houseNumber = assessorPieces[1];
     const direction = assessorPieces[2];
     const streetName = assessorPieces[3];
+    //  data massage the street type to match available types in Assessor search
     const streetTypeValue = assessorPieces.pop().toLowerCase();
     const streetType = (STREET_TYPES.find(t => t.options.includes(streetTypeValue) || t.options.some(o => o.includes(streetTypeValue))) || {value: 'ST'}).value;
     return {houseNumber, streetName, streetType, direction};
 };
 
 const getThatsThemData = async (browser, address) => {
-    const thatsThemURL = `https://thatsthem.com/address/${address.replace(/\./g, '').replace(/,? /g, '-')}`;
-    const page = await browser.newPage();
-    await page.goto(thatsThemURL, {timeout: 60000, waitUntil});
-
     try {
+        const page = await openPage(browser, `https://thatsthem.com/address/${address.replace(/\./g, '').replace(/,? /g, '-')}`);
         return await page.evaluate(() => {
             return Array.from(document.querySelectorAll('.ThatsThem-people-record.row'))
                 .map(result => {
@@ -106,12 +140,15 @@ module.exports = async address => {
 
     const browser = await puppeteer.launch();
 
-    const [ownerData, phoneData] = await Promise.all([
-        getOwnerData(browser, assessorValues),
-        getThatsThemData(browser, address)
-    ]);
-
-    await browser.close();
-
-    return {...ownerData, phones: phoneData.filter(p => (!ownerData.livesThere && !i) || p.name.toUpperCase().includes(ownerData.lastName))};
+    try {
+        const [ownerData, phoneData] = await Promise.all([
+            getOwnerData(browser, assessorValues),
+            getThatsThemData(browser, address)
+        ]);
+        browser.close();
+        return {...ownerData, phones: phoneData.filter(p => (!ownerData.livesThere && !i) || p.name.toUpperCase().includes(ownerData.lastName))};
+    } catch (err) {
+        browser.close();
+        return {error: err.message};
+    }
 };
