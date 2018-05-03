@@ -93,7 +93,7 @@ const getAssessorValues = address => {
         .replace(/\sSouth\s/ig, ' S ')
         .replace(/\sWest\s/ig, 'W');
     //  grab house number, direction, street name, sub-direction (to ignore) and street type
-    const assessorPieces = assessorAddress.match(/(\d+) ([NSEW]) ([^ ]+) ([NSEW]\s)?([A-Za-z]+)$/i);
+    const assessorPieces = assessorAddress.match(/(\d+) ([NSEW]) ([^ ]+) ([NSEW]\s)?([A-Za-z]+)( [NSEW])?$/i);
 
     //  it either works perfectly or not at all
     if (!assessorPieces || assessorPieces.length < 6) {
@@ -105,11 +105,17 @@ const getAssessorValues = address => {
     const direction = assessorPieces[2];
     const streetName = assessorPieces[3];
     //  data massage the street type to match available types in Assessor search
-    const streetTypeValue = assessorPieces.pop().toLowerCase();
+    const streetTypeValue = assessorPieces[5].toLowerCase();
     const streetType = (STREET_TYPES.find(t => t.options.includes(streetTypeValue) || t.options.some(o => o.includes(streetTypeValue))) || {value: 'ST'}).value;
     return {houseNumber, streetName, streetType, direction};
 };
 
+/**
+ * looks up phone numbers using ThatsThem
+ * @param browser
+ * @param address
+ * @returns {Promise<*>}
+ */
 const getThatsThemData = async (browser, address) => {
     try {
         const page = await openPage(browser, `https://thatsthem.com/address/${address.replace(/\./g, '').replace(/,? /g, '-')}`);
@@ -146,7 +152,7 @@ module.exports = async address => {
             getThatsThemData(browser, address)
         ]);
         browser.close();
-        return {...ownerData, phones: phoneData.filter(p => (!ownerData.livesThere && !i) || p.name.toUpperCase().includes(ownerData.lastName))};
+        return {...ownerData, phones: phoneData.filter((p, i) => (!ownerData.livesThere && !i) || p.name.toUpperCase().includes(ownerData.lastName))};
     } catch (err) {
         browser.close();
         return {error: err.message};
