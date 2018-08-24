@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  api:
+    build: .
+    container_name: gather_api
+    ports:
+      - 7712:3000

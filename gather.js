@@ -144,7 +144,7 @@ module.exports = async address => {
         return assessorValues;
     }
 
-    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']});
 
     try {
         const [ownerData, phoneData] = await Promise.all([
