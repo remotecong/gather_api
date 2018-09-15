@@ -66,8 +66,14 @@ const getOwnerData = async (browser, values) => {
 
     return await page.evaluate(houseNumber => {
         const mailingAddress = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
-        const name = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
-        const lastName = name.split(',').map(s => s.trim()).shift();
+        const rawName = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
+        const name = rawName
+            .replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
+            .replace(/\sAnd\s/g, ' & ')
+            .split(', ')
+            .reverse()
+            .join(' ');
+        const lastName = rawName.split(',').map(s => s.trim()).shift();
         const livesThere = mailingAddress.includes(houseNumber);
         return {mailingAddress, name, lastName, livesThere};
     }, values.houseNumber);
