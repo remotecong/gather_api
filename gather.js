@@ -64,12 +64,22 @@ const getOwnerData = async (browser, values) => {
         return {};
     }
 
+    const MULTI_RESULTS_ROW = '#pickone tbody tr:first-child';
+    const multipleResultsTable = await page.$(MULTI_RESULTS_ROW);
+    if (multipleResultsTable) {
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click(MULTI_RESULTS_ROW)
+        ]);
+    }
+
     return await page.evaluate(houseNumber => {
         const mailingAddress = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
         const rawName = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
         const name = rawName
             .replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
             .replace(/\sAnd\s/g, ' & ')
+            .replace(/\s[A-Z]\s/g, ' ')
             .split(', ')
             .reverse()
             .join(' ');
