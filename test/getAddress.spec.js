@@ -20,3 +20,13 @@ test('does two-worded street name addresses', (t) => {
     t.equal(addr.streetType, 'ST');
     t.equal(addr.direction, 'W');
 });
+
+test('does numbererd street name addresses', (t) => {
+    t.plan(4);
+    const addr = getAddress('601 W 32nd St, Broken Arrow, 74013');
+    //return {houseNumber, streetName, streetType, direction};
+    t.equal(addr.houseNumber, '601');
+    t.equal(addr.streetName, '32nd');
+    t.equal(addr.streetType, 'ST');
+    t.equal(addr.direction, 'W');
+});
