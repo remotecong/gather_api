@@ -60,8 +60,10 @@ const getOwnerData = async (browser, values) => {
             .replace(/\s[A-Z]\s/g, ' ')
             .split(', ')
             .reverse()
-            .join(' ');
-        const lastName = rawName.replace(/(the|ttee|rev|trustee|trust|Living|\d+)\s?/gi, '').trim().split(',').map(s => s.trim()).shift();
+            .join(' ')
+            .replace(/( the| ttee| revocable| rev| trustee| trust| Living| \d+)/gi, '')
+            .trim();
+        const lastName = rawName.replace(/( the| ttee| revocable| rev| trustee| trust| Living| \d+)/gi, '').split(',').map(s => s.trim()).shift();
         const livesThere = mailingAddress.includes(houseNumber);
         return {mailingAddress, name, lastName, livesThere};
     }, values.houseNumber);
@@ -110,7 +112,14 @@ module.exports = async address => {
         return assessorValues;
     }
 
-    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']});
+    const browser = await puppeteer.launch({
+        timeout: 10000,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage'
+        ]
+    });
 
     try {
         const [ownerData, phoneData] = await Promise.all([
