@@ -61,7 +61,7 @@ const getOwnerData = async (browser, values) => {
             .split(', ')
             .reverse()
             .join(' ');
-        const lastName = rawName.split(',').map(s => s.trim()).shift();
+        const lastName = rawName.replace(/(the|ttee|rev|trustee|trust|Living|\d+)\s?/gi, '').trim().split(',').map(s => s.trim()).shift();
         const livesThere = mailingAddress.includes(houseNumber);
         return {mailingAddress, name, lastName, livesThere};
     }, values.houseNumber);
@@ -79,12 +79,21 @@ const getThatsThemData = async (browser, address) => {
         return await page.evaluate(() => {
             return Array.from(document.querySelectorAll('.ThatsThem-people-record.row'))
                 .map(result => {
+                    const numberElems = Array.from(result.querySelectorAll('[itemprop="telephone"]')) || [];
                     const name = result.querySelector('h2').textContent.trim();
-                    const number = (result.querySelector('[itemprop="telephone"]') || document.createElement('span')).textContent.trim();
-                    const isMobile = !!result.querySelector('[data-title="Mobile"] [itemprop="telephone"]');
-                    return {name, number, isMobile};
+                    return numberElems
+                        .map((elem) => {
+                            return {
+                                name,
+                                number: elem.textContent.trim(),
+                                isMobile: elem.parentNode.getAttribute('data-title') === 'Mobile'
+                            };
+                        });
                 })
-                .filter((p, i, a) => !!p.number && a.findIndex(ap => ap.number === p.number) === i);
+                .reduce((arr, rec) => {
+                    return arr.concat(rec);
+                }, [])
+                .filter((p, i, a) => a.findIndex(rec => rec.number === p.number) === i);
         });
     } catch (err) {
         console.log('thatsthem error:', err);
@@ -109,7 +118,13 @@ module.exports = async address => {
             getThatsThemData(browser, address)
         ]);
         browser.close();
-        return {...ownerData, phones: phoneData.filter((p, i) => (!ownerData.livesThere && !i) || p.name.toUpperCase().includes(ownerData.lastName))};
+        const phones = phoneData
+            .filter((p, i) => {
+                const isLookingForOwner = ownerData.livesThere;
+                const isOwner = p.name.toUpperCase().includes(ownerData.lastName);
+                return isLookingForOwner ? isOwner : !isOwner;
+            });
+        return {...ownerData, phones};
     } catch (err) {
         browser.close();
         return {error: err.message};

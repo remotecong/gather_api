@@ -35,11 +35,6 @@ const getAssessorValues = address => {
         .shift()
         //  strip away all periods (e.g. "S.")
         .replace(/\./g, '')
-        //  reduce any directional words to be their single character to help me match later
-        .replace(/\sEast\s/ig, ' E ')
-        .replace(/\sNorth\s/ig, ' N ')
-        .replace(/\sSouth\s/ig, ' S ')
-        .replace(/\sWest\s/ig, 'W');
     //  grab house number, direction, street name, sub-direction (to ignore) and street type
     const assessorPieces = assessorAddress.match(/(\d+) ([NSEW]) ([\w\s]+) ([NSEW]\s)?([A-Za-z]+)( [NSEW])?$/i);
 
