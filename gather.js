@@ -52,6 +52,15 @@ const getOwnerData = async (browser, values) => {
     }
 
     return await page.evaluate(houseNumber => {
+        const didFileHomesteadExemption = () => {
+            try {
+                return !!document.querySelector('[href="assessor-homestead.php"]').parentNode.nextSibling.nextSibling.querySelector('img');
+            } catch (ignore) {
+                console.warn('HEPR', ignore);
+                return false;
+            }
+            return false;
+        };
         const mailingAddress = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
         const rawName = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
         const name = rawName
@@ -64,7 +73,7 @@ const getOwnerData = async (browser, values) => {
             .replace(/( the| ttee| revocable| rev| trustee| trust| Living| \d+)/gi, '')
             .trim();
         const lastName = rawName.replace(/( the| ttee| revocable| rev| trustee| trust| Living| \d+)/gi, '').split(',').map(s => s.trim()).shift();
-        const livesThere = mailingAddress.includes(houseNumber);
+        const livesThere = mailingAddress.includes(houseNumber) || didFileHomesteadExemption(document);
         return {mailingAddress, name, lastName, livesThere};
     }, values.houseNumber);
 };

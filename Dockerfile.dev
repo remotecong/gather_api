@@ -1,0 +1,7 @@
+FROM buildkite/puppeteer:v1.6.2
+WORKDIR /code/
+COPY package*.json ./
+RUN npm i -g nodemon && npm i > /dev/null
+COPY . .
+CMD nodemon index.js
+EXPOSE 3000

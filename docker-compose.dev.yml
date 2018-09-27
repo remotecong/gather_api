@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: gather_api
+    volumes:
+      - .:/code/
+      - /code/node_modules/
+    environment:
+      - REACT_APP_API_URL=http://localhost:7712
+    ports:
+      - 7712:3000
