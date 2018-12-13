@@ -86,7 +86,7 @@ const getOwnerData = async (browser, values) => {
  */
 const getThatsThemData = async (browser, address) => {
     try {
-        const page = await openPage(browser, `https://thatsthem.com/address/${address.replace(/\./g, '').replace(/,? /g, '-')}`);
+        const page = await openPage(browser, `https://thatsthem.com/address/${address.replace(/\s#\d+/, '').replace(/\./g, '').replace(/,? /g, '-')}`);
         return await page.evaluate(() => {
             return Array.from(document.querySelectorAll('.ThatsThem-people-record.row'))
                 .map(result => {

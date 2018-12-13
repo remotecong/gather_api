@@ -29,6 +29,8 @@ const STREET_TYPES = [
 const getAssessorValues = address => {
     //  1234 N Main St, City Name, ST
     const assessorAddress = address
+        //  get rid of unit numbers
+        .replace(/\s#\d+/, '')
         //  ditch everything after the first comma
         .split(',')
         //  just give me the street address, we know it's in tulsa
