@@ -78,6 +78,8 @@ const getOwnerData = async (browser, values) => {
     }, values.houseNumber);
 };
 
+const getThatsThemUrl = address =>  `https://thatsthem.com/address/${address.replace(/\s#\d+/, '').replace(/\./g, '').replace(/,? /g, '-')}`;
+
 /**
  * looks up phone numbers using ThatsThem
  * @param browser
@@ -86,7 +88,7 @@ const getOwnerData = async (browser, values) => {
  */
 const getThatsThemData = async (browser, address) => {
     try {
-        const page = await openPage(browser, `https://thatsthem.com/address/${address.replace(/\s#\d+/, '').replace(/\./g, '').replace(/,? /g, '-')}`);
+        const page = await openPage(browser, getThatsThemUrl(address));
         return await page.evaluate(() => {
             return Array.from(document.querySelectorAll('.ThatsThem-people-record.row'))
                 .map(result => {
@@ -142,7 +144,7 @@ module.exports = async address => {
                 const isOwner = p.name.toUpperCase().includes(ownerData.lastName);
                 return isLookingForOwner ? isOwner : !isOwner;
             });
-        return {...ownerData, phones};
+        return {...ownerData, phones, thatsThemUrl: getThatsThemUrl(address)};
     } catch (err) {
         browser.close();
         return {error: err.message};
