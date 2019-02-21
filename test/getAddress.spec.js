@@ -30,3 +30,12 @@ test('does numbererd street name addresses', (t) => {
     t.equal(addr.streetType, 'ST');
     t.equal(addr.direction, 'W');
 });
+
+test('does weird addresses where theres a direction after the name', (t) => {
+    const addr = getAddress('3815 E. 116th Pl S, Tulsa, 74137');
+    t.plan(4);
+    t.equal(addr.streetName, '116th');
+    t.equal(addr.houseNumber, '3815');
+    t.equal(addr.streetType, 'PL');
+    t.equal(addr.direction, 'E');
+});
