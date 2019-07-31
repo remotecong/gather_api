@@ -1,10 +1,11 @@
 const puppeteer = require('puppeteer');
-const getAssessorValues = require('./getAddress');
+const getAssessorValues = require('./getAddress.js');
 const openPage = async (browser, url) => {
     const page = await browser.newPage();
     await page.goto(url, {waitUntil: 'domcontentloaded'});
     return page;
 };
+const nameGuess = require('./name-guesser.js');
 
 /**
  * runs assessor search for decoded address and returns owner's info which includes:
@@ -51,31 +52,22 @@ const getOwnerData = async (browser, values) => {
         ]);
     }
 
-    return await page.evaluate(houseNumber => {
-        const didFileHomesteadExemption = () => {
-            try {
-                return !!document.querySelector('[href="assessor-homestead.php"]').parentNode.nextSibling.nextSibling.querySelector('img');
-            } catch (ignore) {
-                console.warn('HEPR', ignore);
-                return false;
-            }
-            return false;
-        };
+    const details = await page.evaluate((houseNumber) => {
+        const didFileHomesteadExemption = document.querySelector('#adjustments tbody tr td:first-child').textContent === 'Homestead' && document.querySelector('#adjustments tbody tr td:last-child img');
+
         const mailingAddress = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
+
         const rawName = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
-        const name = rawName
-            .replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
-            .replace(/\sAnd\s/g, ' & ')
-            .replace(/\s[A-Z]\s/g, ' ')
-            .split(', ')
-            .reverse()
-            .join(' ')
-            .replace(/( the| ttee| revocable| rev| trustee| trust| Living| \d+)/gi, '')
-            .trim();
-        const lastName = rawName.replace(/( the| ttee| revocable| rev| trustee| trust| Living| \d+)/gi, '').split(',').map(s => s.trim()).shift();
-        const livesThere = mailingAddress.includes(houseNumber) || didFileHomesteadExemption(document);
-        return {mailingAddress, name, lastName, livesThere};
+
+        const livesThere = mailingAddress.includes(houseNumber) ||
+            (didFileHomesteadExemption && mailingAddress.toLowerCase().includes('po box'));
+
+        return {mailingAddress, livesThere, rawName};
     }, values.houseNumber);
+
+    const {name, lastName} = nameGuess(details.rawName);
+
+    return {...details, name, lastName};
 };
 
 const getThatsThemUrl = address =>  `https://thatsthem.com/address/${address.replace(/\s#\d+/, '').replace(/\./g, '').replace(/,? /g, '-')}`;
@@ -140,9 +132,8 @@ module.exports = async address => {
         browser.close();
         const phones = phoneData
             .filter((p, i) => {
-                const isLookingForOwner = ownerData.livesThere;
                 const isOwner = p.name.toUpperCase().includes(ownerData.lastName);
-                return isLookingForOwner ? isOwner : !isOwner;
+                return ownerData.livesThere ? isOwner : !isOwner;
             });
         return {...ownerData, phones, thatsThemUrl: getThatsThemUrl(address)};
     } catch (err) {
