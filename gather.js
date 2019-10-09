@@ -6,6 +6,7 @@ const openPage = async (browser, url) => {
     return page;
 };
 const nameGuess = require('./name-guesser.js');
+const UPS_BOXES = require('./ups-locations.js');
 
 /**
  * runs assessor search for decoded address and returns owner's info which includes:
@@ -52,22 +53,25 @@ const getOwnerData = async (browser, values) => {
         ]);
     }
 
-    const details = await page.evaluate((houseNumber) => {
-        const didFileHomesteadExemption = document.querySelector('#adjustments tbody tr td:first-child').textContent === 'Homestead' && document.querySelector('#adjustments tbody tr td:last-child img');
-
+    const details = await page.evaluate(() => {
+        const homestead = document.querySelector('#adjustments tbody tr td:first-child').textContent === 'Homestead' &&
+            document.querySelector('#adjustments tbody tr td:last-child img');
         const mailingAddress = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
-
         const rawName = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
-
-        const livesThere = mailingAddress.includes(houseNumber) ||
-            (didFileHomesteadExemption && mailingAddress.toLowerCase().includes('po box'));
-
-        return {mailingAddress, livesThere, rawName};
-    }, values.houseNumber);
+        return {mailingAddress, homestead, rawName};
+    });
 
     const {name, lastName} = nameGuess(details.rawName);
+    const livesThere = details.mailingAddress.includes(values.houseNumber) ||
+        (details.homestead && usesPOBox(details.mailingAddress));
+    return {...details, name, lastName, livesThere};
+};
 
-    return {...details, name, lastName};
+const usesPOBox = (addr) => {
+    const comp = addr.toLowerCase();
+    return /po box/.test(comp) || UPS_BOXES.some((box) => {
+        return comp.includes(box.toLowerCase());
+    });
 };
 
 const getThatsThemUrl = address =>  `https://thatsthem.com/address/${address.replace(/\s#\d+/, '').replace(/\./g, '').replace(/,? /g, '-')}`;
@@ -130,7 +134,7 @@ module.exports = async address => {
             getThatsThemData(browser, address)
         ]);
         browser.close();
-        const phones = phoneData
+        const phones = (phoneData || [])
             .filter((p, i) => {
                 const isOwner = p.name.toUpperCase().includes(ownerData.lastName);
                 return ownerData.livesThere ? isOwner : !isOwner;
