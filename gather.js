@@ -1,4 +1,6 @@
 const puppeteer = require('puppeteer');
+const Sentry = require('@sentry/node');
+const { getThatsThemData, getThatsThemUrl } = require('./thatsthem.js');
 const getAssessorValues = require('./getAddress.js');
 const openPage = async (browser, url) => {
     const page = await browser.newPage();
@@ -40,6 +42,8 @@ const getOwnerData = async (browser, values) => {
             }, values)
         ]);
     } catch (err) {
+        err.assessorSearch = true;
+        Sentry.captureException(err);
         console.log('Failed to do the assessor search', err);
         return {};
     }
@@ -74,41 +78,6 @@ const usesPOBox = (addr) => {
     });
 };
 
-const getThatsThemUrl = address =>  `https://thatsthem.com/address/${address.replace(/\s#\d+/, '').replace(/\./g, '').replace(/,? /g, '-')}`;
-
-/**
- * looks up phone numbers using ThatsThem
- * @param browser
- * @param address
- * @returns {Promise<*>}
- */
-const getThatsThemData = async (browser, address) => {
-    try {
-        const page = await openPage(browser, getThatsThemUrl(address));
-        return await page.evaluate(() => {
-            return Array.from(document.querySelectorAll('.ThatsThem-people-record.row'))
-                .map(result => {
-                    const numberElems = Array.from(result.querySelectorAll('[itemprop="telephone"]')) || [];
-                    const name = result.querySelector('h2').textContent.trim();
-                    return numberElems
-                        .map((elem) => {
-                            return {
-                                name,
-                                number: elem.textContent.trim(),
-                                isMobile: elem.parentNode.getAttribute('data-title') === 'Mobile'
-                            };
-                        });
-                })
-                .reduce((arr, rec) => {
-                    return arr.concat(rec);
-                }, [])
-                .filter((p, i, a) => a.findIndex(rec => rec.number === p.number) === i);
-        });
-    } catch (err) {
-        console.log('thatsthem error:', err);
-    }
-};
-
 module.exports = async address => {
     if (!address) {
         return {error: 'Missing address'};
@@ -129,9 +98,14 @@ module.exports = async address => {
     });
 
     try {
+        Sentry.addBreadcrumb({
+            category: 'search',
+            message: address,
+            level: Sentry.Severity.Info
+        });
         const [ownerData, phoneData] = await Promise.all([
             getOwnerData(browser, assessorValues),
-            getThatsThemData(browser, address)
+            getThatsThemData(address)
         ]);
         browser.close();
         const phones = (phoneData || [])
@@ -141,6 +115,7 @@ module.exports = async address => {
             });
         return {...ownerData, phones, thatsThemUrl: getThatsThemUrl(address)};
     } catch (err) {
+        Sentry.captureException(err);
         browser.close();
         return {error: err.message};
     }

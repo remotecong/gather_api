@@ -1,8 +1,8 @@
-FROM buildkite/puppeteer:v1.6.2
+FROM buildkite/puppeteer:v1.15.0
 WORKDIR /code/
-COPY package*.json ./
-RUN npm i > /dev/null
+COPY package.json yarn.lock ./
+RUN yarn
 COPY . .
 EXPOSE 3000
-CMD npm start
+CMD yarn start
 

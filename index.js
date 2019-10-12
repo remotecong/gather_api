@@ -1,6 +1,8 @@
 const http = require('http');
 const {parse} = require('url');
 const gather = require('./gather');
+const Sentry = require('@sentry/node');
+Sentry.init({ dsn: process.env.SENTRY_URL});
 
 http
     .createServer((req, res) => {
@@ -21,11 +23,13 @@ http
                             res.end(JSON.stringify(data))
                         })
                         .catch(err => {
+                            Sentry.captureException(err);
                             console.log(err);
                             res.writeHead(500);
                             res.end('{}');
                         });
                 } else {
+                    Sentry.captureException(new Error('no query submitted'));
                     res.writeHead(404);
                     res.end('hi');
                 }
