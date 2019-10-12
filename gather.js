@@ -20,6 +20,12 @@ const UPS_BOXES = require('./ups-locations.js');
  * @returns {Promise<*>}
  */
 const getOwnerData = async (browser, values) => {
+    Sentry.configureScope(scope => {
+        scope.setTag('assessor_dir', values.direction);
+        scope.setTag('assessor_house_num', values.houseNumber);
+        scope.setTag('assessor_street', `${values.streetName} ${values.streetType}`);
+    });
+
     const page = await openPage(browser, 'http://www.assessor.tulsacounty.org/assessor-property-search.php');
 
     const shouldAccept = await page.$('[name="accepted"].positive');
@@ -82,6 +88,10 @@ module.exports = async address => {
     if (!address) {
         return {error: 'Missing address'};
     }
+
+    Sentry.configureScope(scope => {
+        scope.setTag('query', address);
+    });
 
     const assessorValues = getAssessorValues(address);
     if (!assessorValues || assessorValues.error) {

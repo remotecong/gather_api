@@ -13,6 +13,9 @@ const getThatsThemUrl = address =>  `https://thatsthem.com/address/${address.rep
 const getThatsThemData = async (address) => {
     try {
         const url = getThatsThemUrl(address);
+        Sentry.configureScope(scope => {
+            scope.setTag('tt_url', url);
+        });
         const doc = await domget({
             url: getThatsThemUrl(address),
             headers: {
