@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const Sentry = require('@sentry/node');
 const { getThatsThemData, getThatsThemUrl } = require('./thatsthem.js');
 const getAssessorValues = require('./getAddress.js');
+const cache = require('./cache.js');
 const openPage = async (browser, url) => {
     const page = await browser.newPage();
     await page.goto(url, {waitUntil: 'domcontentloaded'});
@@ -9,6 +10,7 @@ const openPage = async (browser, url) => {
 };
 const nameGuess = require('./name-guesser.js');
 const UPS_BOXES = require('./ups-locations.js');
+const MAX_REQ_TIMEOUT = 10000;
 
 /**
  * runs assessor search for decoded address and returns owner's info which includes:
@@ -84,6 +86,56 @@ const usesPOBox = (addr) => {
     });
 };
 
+const BROWSER_STATE = {
+    browser: null,
+    timerId: -1
+};
+
+const getBrowser = async () => {
+    clearTimeout(BROWSER_STATE.timerId);
+    BROWSER_STATE.timerId = setTimeout(closeBrowser, MAX_REQ_TIMEOUT * 3);
+    if (BROWSER_STATE.browser) {
+        return BROWSER_STATE.browser
+    }
+    BROWSER_STATE.browser = await puppeteer.launch({
+        timeout: MAX_REQ_TIMEOUT,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage'
+        ]
+    });
+    return BROWSER_STATE.browser
+};
+
+const closeBrowser = async () => {
+    try {
+        const browser = BROWSER_STATE.browser;
+        BROWSER_STATE.browser = null;
+        return await browser.close();
+    } catch (err) {
+        Sentry.captureException(err);
+    }
+};
+
+const getCachedSearch = async (address) => {
+    try {
+        const data = await cache.getVal(address);
+        return JSON.parse(data);
+    } catch(err) {
+        Sentry.captureException(err);
+        return null;
+    }
+};
+
+const cacheSearch = async (address, results) => {
+    try {
+        return cache.setVal(address, JSON.stringify(results));
+    } catch(err) {
+        Sentry.captureException(err);
+    }
+};
+
 module.exports = async address => {
     if (!address) {
         return {error: 'Missing address'};
@@ -93,40 +145,39 @@ module.exports = async address => {
         scope.setTag('query', address);
     });
 
+    const cachedResults = await getCachedSearch(address);
+
+    if (cachedResults) {
+        return cachedResults;
+    }
+
     const assessorValues = getAssessorValues(address);
     if (!assessorValues || assessorValues.error) {
         return assessorValues;
     }
 
-    const browser = await puppeteer.launch({
-        timeout: 10000,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage'
-        ]
-    });
-
     try {
-        Sentry.addBreadcrumb({
-            category: 'search',
-            message: address,
-            level: Sentry.Severity.Info
+        const browser = await getBrowser();
+        Sentry.configureScope(scope => {
+            scope.setTag('query', address);
         });
         const [ownerData, phoneData] = await Promise.all([
             getOwnerData(browser, assessorValues),
             getThatsThemData(address)
         ]);
-        browser.close();
         const phones = (phoneData || [])
             .filter((p, i) => {
                 const isOwner = p.name.toUpperCase().includes(ownerData.lastName);
                 return ownerData.livesThere ? isOwner : !isOwner;
             });
-        return {...ownerData, phones, thatsThemUrl: getThatsThemUrl(address)};
+        const results = {...ownerData, phones, thatsThemUrl: getThatsThemUrl(address)};
+        //  not caching if thatsthem fails to load
+        if (phoneData && phoneData.length) {
+            cacheSearch(address, results);
+        }
+        return results;
     } catch (err) {
         Sentry.captureException(err);
-        browser.close();
         return {error: err.message};
     }
 };

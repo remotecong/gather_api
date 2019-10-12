@@ -7,3 +7,5 @@ services:
     env_file: .env
     ports:
       - 7712:3000
+  redis:
+      image: redis:5.0.6-alpine
