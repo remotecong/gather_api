@@ -73,7 +73,7 @@ const getOwnerData = async (browser, values) => {
             return {mailingAddress, homestead, rawName};
         } catch (err) {
             //  pass up to node app
-            return {error: err};
+            return {error: err.stack};
         }
     });
 
@@ -82,7 +82,7 @@ const getOwnerData = async (browser, values) => {
             scope.setTag('assessor_dir', values.direction);
             scope.setTag('assessor_house_num', values.houseNumber);
             scope.setTag('assessor_street', `${values.streetName} ${values.streetType}`);
-            Sentry.captureException(details.error);
+            Sentry.captureException(new Error(details.error));
         });
         //  TODO: come up with better handling for UI
         return null;
