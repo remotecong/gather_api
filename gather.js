@@ -151,13 +151,12 @@ module.exports = async address => {
     }
 
     const { houseNumber, direction, streetName, streetType } = assessorValues;
-    const thatsThemAddress = `${houseNumber} ${direction} ${streetName} ${streetType}, Tulsa, OK`;
 
     try {
         const browser = await getBrowser();
         const [ownerData, phoneData] = await Promise.all([
             getOwnerData(browser, assessorValues),
-            getThatsThemData(thatsThemAddress)
+            getThatsThemData(address)
         ]);
         console.log(phoneData || 'NOTHING MATE')
         const phones = (phoneData || [])
