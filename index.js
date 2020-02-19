@@ -12,7 +12,7 @@ http
         res.setHeader('Access-Control-Allow-Headers', '*');
         Sentry.configureScope(scope => {
             scope.clear();
-            scope.setTag('ip', req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+            scope.setTag('ip', req.connection.remoteAddress);
             scope.setTag('ua', req.headers['user-agent']);
         });
 
