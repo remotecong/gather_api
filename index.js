@@ -2,7 +2,7 @@ const http = require('http');
 const {parse} = require('url');
 const gather = require('./gather');
 const Sentry = require('@sentry/node');
-Sentry.init({ dsn: process.env.SENTRY_URL});
+Sentry.init({ dsn: process.env.SENTRY_URL });
 
 http
     .createServer((req, res) => {
@@ -11,6 +11,7 @@ http
         res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
         res.setHeader('Access-Control-Allow-Headers', '*');
         Sentry.configureScope(scope => {
+            scope.clear();
             scope.setTag('ip', req.headers['x-forwarded-for'] || req.connection.remoteAddress);
             scope.setTag('ua', req.headers['user-agent']);
         });
@@ -27,7 +28,10 @@ http
                         res.end(JSON.stringify(data))
                     })
                     .catch(err => {
-                        Sentry.captureException(err);
+                        Sentry.withScope(scope => {
+                            scope.setTag('query', query.address);
+                            Sentry.captureException(err);
+                        });
                         console.log(err);
                         res.writeHead(500);
                         res.end('{}');

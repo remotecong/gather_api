@@ -37,6 +37,7 @@ const getAssessorValues = address => {
         .shift()
         //  strip away all periods (e.g. "S.")
         .replace(/\./g, '')
+        //  strip trailing direction
         .replace(/[NSEW]$/, '')
         .trim();
     //  grab house number, direction, street name, sub-direction (to ignore) and street type

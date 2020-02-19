@@ -22,12 +22,6 @@ const MAX_REQ_TIMEOUT = 10000;
  * @returns {Promise<*>}
  */
 const getOwnerData = async (browser, values) => {
-    Sentry.configureScope(scope => {
-        scope.setTag('assessor_dir', values.direction);
-        scope.setTag('assessor_house_num', values.houseNumber);
-        scope.setTag('assessor_street', `${values.streetName} ${values.streetType}`);
-    });
-
     const page = await openPage(browser, 'http://www.assessor.tulsacounty.org/assessor-property-search.php');
 
     const shouldAccept = await page.$('[name="accepted"].positive');
@@ -51,7 +45,12 @@ const getOwnerData = async (browser, values) => {
         ]);
     } catch (err) {
         err.assessorSearch = true;
-        Sentry.captureException(err);
+        Sentry.withScope(scope => {
+            scope.setTag('assessor_dir', values.direction);
+            scope.setTag('assessor_house_num', values.houseNumber);
+            scope.setTag('assessor_street', `${values.streetName} ${values.streetType}`);
+            Sentry.captureException(err);
+        });
         console.log('Failed to do the assessor search', err);
         return {};
     }
@@ -141,12 +140,7 @@ module.exports = async address => {
         return {error: 'Missing address'};
     }
 
-    Sentry.configureScope(scope => {
-        scope.setTag('query', address);
-    });
-
     const cachedResults = await getCachedSearch(address);
-
     if (cachedResults) {
         return cachedResults;
     }
@@ -156,15 +150,16 @@ module.exports = async address => {
         return assessorValues;
     }
 
+    const { houseNumber, direction, streetName, streetType } = assessorValues;
+    const thatsThemAddress = `${houseNumber} ${direction} ${streetName} ${streetType}, Tulsa, OK`;
+
     try {
         const browser = await getBrowser();
-        Sentry.configureScope(scope => {
-            scope.setTag('query', address);
-        });
         const [ownerData, phoneData] = await Promise.all([
             getOwnerData(browser, assessorValues),
-            getThatsThemData(address)
+            getThatsThemData(thatsThemAddress)
         ]);
+        console.log(phoneData || 'NOTHING MATE')
         const phones = (phoneData || [])
             .filter((p, i) => {
                 const isOwner = p.name.toUpperCase().includes(ownerData.lastName);
@@ -177,7 +172,11 @@ module.exports = async address => {
         }
         return results;
     } catch (err) {
-        Sentry.captureException(err);
+        Sentry.withScope(scope => {
+            scope.setTag('query', address);
+            Sentry.captureException(err);
+        });
+
         return {error: err.message};
     }
 };
