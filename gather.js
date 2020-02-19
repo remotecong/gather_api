@@ -65,13 +65,28 @@ const getOwnerData = async (browser, values) => {
     }
 
     const details = await page.evaluate(() => {
-        const homestead = document.querySelector('#adjustments tbody tr td:first-child').textContent === 'Homestead' &&
-            document.querySelector('#adjustments tbody tr td:last-child img');
-        const mailingAddress = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
-        const rawName = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
-        return {mailingAddress, homestead, rawName};
+        try {
+            const homestead = document.querySelector('#adjustments tbody tr td:first-child').textContent === 'Homestead' &&
+                document.querySelector('#adjustments tbody tr td:last-child img');
+            const mailingAddress = Array.from(document.querySelectorAll('td')).find(cell => /Owner mailing address/i.test(cell.innerText)).nextElementSibling.innerHTML.replace(/<br>/g, ', ');
+            const rawName = Array.from(document.querySelectorAll('td')).find(cell => /Owner name/i.test(cell.innerText)).nextElementSibling.textContent;
+            return {mailingAddress, homestead, rawName};
+        } catch (err) {
+            //  pass up to node app
+            return {error: err};
+        }
     });
 
+    if (details.error) {
+        Sentry.withScope(scope => {
+            scope.setTag('assessor_dir', values.direction);
+            scope.setTag('assessor_house_num', values.houseNumber);
+            scope.setTag('assessor_street', `${values.streetName} ${values.streetType}`);
+            Sentry.captureException(details.error);
+        });
+        //  TODO: come up with better handling for UI
+        return null;
+    }
     const {name, lastName} = nameGuess(details.rawName);
     const livesThere = details.mailingAddress.includes(values.houseNumber) ||
         (details.homestead && usesPOBox(details.mailingAddress));
@@ -158,7 +173,6 @@ module.exports = async address => {
             getOwnerData(browser, assessorValues),
             getThatsThemData(address)
         ]);
-        console.log(phoneData || 'NOTHING MATE')
         const phones = (phoneData || [])
             .filter((p, i) => {
                 const isOwner = p.name.toUpperCase().includes(ownerData.lastName);
