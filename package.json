@@ -10,10 +10,9 @@
   "author": "@dillonchr",
   "license": "GPL-2.0",
   "dependencies": {
-    "@dillonchr/domget": "https://github.com/dillonchr/domget/#features.cheerio",
+    "@dillonchr/domget": "^1.1.0",
     "@sentry/node": "5.7.0",
     "bluebird": "3.7.0",
-    "domget": "https://github.com/dillonchr/domget/#features.cheerio",
     "puppeteer": "^1.15.0",
     "redis": "^2.8.0"
   },
