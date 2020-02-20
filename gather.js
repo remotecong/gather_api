@@ -173,6 +173,7 @@ module.exports = async address => {
             getOwnerData(browser, assessorValues),
             getThatsThemData(address)
         ]);
+        console.log('WHAT WE GOT', phoneData);
         const phones = (phoneData || [])
             .filter((p, i) => {
                 const isOwner = p.name.toUpperCase().includes(ownerData.lastName);
