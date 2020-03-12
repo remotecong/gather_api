@@ -2,8 +2,6 @@ const Sentry = require('@sentry/node');
 const { promisify } = require('bluebird');
 const domget = promisify(require('@dillonchr/domget'));
 
-const safeTrim = (str) => str && str.trim();
-
 const getThatsThemUrl = address =>  `https://thatsthem.com/address/${address.replace(/\s#\d+/, '').replace(/\./g, '').replace(/,? /g, '-')}`;
 
 /**
@@ -46,22 +44,14 @@ const getThatsThemData = async (address) => {
                 return p.number &&
                     a.findIndex(({ number }) => number === p.number) === i;
             });
-
-        return Array(rows.length).fill('')
-            .map((ignore, i) => {
-                const root = $(rows[i]);
-                return {
-                    name: safeTrim(root.find('h2').text()),
-                    number: safeTrim(root.find('a[data-title*="Mobile"], a[data-title*="Landline"]').text()),
-                    isMobile: !!root.find('a[data-title*="Mobile"]').length,
-                };
-            })
-        return results;
     } catch (err) {
         err.thatsThem = true;
         Sentry.captureException(err);
         console.log('thatsthem error:', err);
     }
+
+    //  in the event of catastrophic failure, have an array.
+    return [];
 };
 
 module.exports = {

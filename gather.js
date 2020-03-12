@@ -173,9 +173,9 @@ module.exports = async address => {
             getOwnerData(browser, assessorValues),
             getThatsThemData(address)
         ]);
-        console.log('WHAT WE GOT', phoneData);
-        const phones = (phoneData || [])
+        const phones = phoneData
             .filter((p, i) => {
+                // WARN: assumes assessor name will be uppercase
                 const isOwner = p.name.toUpperCase().includes(ownerData.lastName);
                 return ownerData.livesThere ? isOwner : !isOwner;
             });
