@@ -1,7 +1,7 @@
 import http from "http";
 import { parse } from "url";
 import gather from "./gather";
-import Sentry from "@sentry/node";
+import * as Sentry from "@sentry/node";
 Sentry.init({ dsn: process.env.SENTRY_URL });
 
 http

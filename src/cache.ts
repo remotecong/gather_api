@@ -2,7 +2,7 @@ import redis from "redis";
 import { promisify } from "bluebird";
 
 const client = redis.createClient({
-  host: "redis"
+  host: "localhost"
 });
 
 const _getVal = promisify(client.get, { context: client });
