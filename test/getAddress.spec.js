@@ -1,5 +1,5 @@
 const test = require('tape');
-const getAddress = require('../getAddress');
+const getAddress = require('../src/getAddress');
 
 test('does normal addresses', (t) => {
     t.plan(4);

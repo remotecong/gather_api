@@ -2,9 +2,9 @@
   "name": "gather",
   "version": "0.0.0",
   "description": "phone and letter territory information gatherer",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index",
+    "start": "node src/index",
     "test": "tape test/getAddress.spec.js"
   },
   "author": "@dillonchr",
