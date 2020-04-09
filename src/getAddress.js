@@ -57,7 +57,25 @@ const getAssessorValues = address => {
         t.options.some(o => o.includes(streetTypeValue))
     ) || { value: "ST" }
   ).value;
-  return { houseNumber, streetName, streetType, direction };
+
+
+  return {
+    ln: '',
+    fn: '',
+    srchbox: 'on',
+    streetno: houseNumber,
+    predirection: direction,
+    streetname: streetName,
+    streettype: streetType,
+    subaddr: 'Search+by+address',
+    subdivname: '',
+    subdivnum: '',
+    subdivlot: '',
+    subdivblk: '',
+    account: '',
+    parcel: '',
+    accepted: 'accepted',
+  };
 };
 
 module.exports = getAssessorValues;

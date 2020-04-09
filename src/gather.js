@@ -56,7 +56,7 @@ module.exports = async address => {
   try {
     const browser = await getBrowser();
     const [ownerData, phoneData] = await Promise.all([
-      getOwnerData(browser, assessorValues),
+      getOwnerData(browser, address),
       getThatsThemData(address)
     ]);
     const phones = phoneData.filter((p, i) => {

@@ -1,14 +1,53 @@
 const Sentry = require("@sentry/node");
 const nameGuess = require("./name-guesser.js");
 const usesPOBox = require("./ups-locations.js");
+const fetch = require('@dillonchr/fetch');
+const cheerio = require('cheerio');
+const getAssessorValues = require("./getAddress.js");
+const querystring = require('query-string');
+const axios = require('axios');
+const { default: formurlencoded } = require('form-urlencoded');
+const axiosCookieJarSupport = require('axios-cookiejar-support').default;
+const tough = require('tough-cookie');
 
-async function openPage(browser, url) {
-  const page = await browser.newPage();
-  await page.goto(url, { waitUntil: "domcontentloaded" });
-  return page;
-}
+const ASSESSOR_URL = 'https://assessor.tulsacounty.org/assessor-property-view.php';
 
-async function getOwnerData(browser, values) {
+async function getOwnerData(browser, address, fn) {
+  try {
+    const firstLoadRes = await axios.get('https://assessor.tulsacounty.org/assessor-property-search.php')
+    if (firstLoadRes.status >= 400) {
+      throw Error(firstLoadRes.statusText);
+    }
+    const phpSessionCookies = firstLoadRes.headers['set-cookie'][0].substr(0, firstLoadRes.headers['set-cookie'][0].length - 6).trim();
+    console.log('SESSION COOKIES', phpSessionCookies);
+    if (!phpSessionCookies) {
+      throw Error('no cookies');
+    }
+    console.log('SESSION COOKIES', phpSessionCookies);
+    const assessorFormData = formurlencoded(getAssessorValues(address));
+    console.log(assessorFormData);
+    const scrape = await axios({
+      url: ASSESSOR_URL,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:74.0) Gecko/20100101 Firefox/74.0',
+        'cookie': phpSessionCookies,
+      },
+      method: 'post',
+      data: assessorFormData,
+      withCredentials: true,
+    });
+    console.log(scrape);
+
+  } catch(err) {
+    console.error('OH IT FAILED', err);
+  }
+
+
+  return console.log('THUS ENDS THE GREATEST COMMAND OF ALL TIME');
+
+
+  /*
+
   const page = await openPage(
     browser,
     "http://www.assessor.tulsacounty.org/assessor-property-search.php"
@@ -61,7 +100,7 @@ async function getOwnerData(browser, values) {
     try {
       const homestead =
         document.querySelector("#adjustments tbody tr td:first-child")
-          .textContent === "Homestead" &&
+        .textContent === "Homestead" &&
         document.querySelector("#adjustments tbody tr td:last-child img");
       const mailingAddress = Array.from(document.querySelectorAll("td"))
         .find(cell => /Owner mailing address/i.test(cell.innerText))
@@ -86,7 +125,7 @@ async function getOwnerData(browser, values) {
       );
       Sentry.captureException(new Error(details.error));
     });
-    //  TODO: come up with better handling for UI
+//  TODO: come up with better handling for UI
     return null;
   }
   const { name, lastName } = nameGuess(details.rawName);
@@ -94,6 +133,14 @@ async function getOwnerData(browser, values) {
     details.mailingAddress.includes(values.houseNumber) ||
     (details.homestead && usesPOBox(details.mailingAddress));
   return { ...details, name, lastName, livesThere };
+  */
 }
 
 module.exports = getOwnerData;
+
+
+if (process.argv[1] === __filename) {
+  getOwnerData(null, '11106 S 108th E Ave, Bixby, OK', (err, html) => {
+    console.log('CALLBACK RUN', err || html);
+  });
+}

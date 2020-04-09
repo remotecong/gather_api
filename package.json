@@ -11,10 +11,17 @@
   "license": "GPL-2.0",
   "dependencies": {
     "@dillonchr/domget": "^1.1.0",
+    "@dillonchr/fetch": "^1.0.1",
     "@sentry/node": "5.7.0",
+    "axios": "^0.19.2",
+    "axios-cookiejar-support": "^0.5.1",
     "bluebird": "3.7.0",
+    "cheerio": "^1.0.0-rc.3",
+    "form-urlencoded": "^4.1.3",
     "puppeteer": "^1.15.0",
-    "redis": "^2.8.0"
+    "query-string": "^6.12.0",
+    "redis": "^2.8.0",
+    "tough-cookie": "^4.0.0"
   },
   "devDependencies": {
     "tape": "^4.9.1"
