@@ -1,6 +1,6 @@
 const Sentry = require("@sentry/node");
-const { promisify } = require("bluebird");
-const domget = promisify(require("@dillonchr/domget"));
+const cheerio = require('cheerio');
+const axios = require('axios');
 
 const getThatsThemUrl = address =>
   `https://thatsthem.com/address/${address
@@ -8,59 +8,64 @@ const getThatsThemUrl = address =>
     .replace(/\./g, "")
     .replace(/,? /g, "-")}`;
 
-/**
- * looks up phone numbers using ThatsThem
- * @param browser
- * @param address
- * @returns {Promise<*>}
- */
-const getThatsThemData = async address => {
+async function getThatsThemData(address) {
   try {
     const url = getThatsThemUrl(address);
     Sentry.configureScope(scope => {
       scope.setTag("tt_url", url);
     });
 
-    const document = await domget({
-      url,
+    const res = await axios.get(url, {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:72.0) Gecko/20100101 Firefox/72.0"
-      }
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:74.0) Gecko/20100101 Firefox/74.0',
+      },
     });
 
-    return Array.from(document.querySelectorAll(".ThatsThem-people-record.row"))
-      .map(elem => {
-        const name = elem.querySelector("h2").text.trim();
-        const fake = true;
-
-        return Array.from(elem.querySelectorAll("a"))
-          .filter(a => /^\/phone/.test(a.attributes.href))
-          .map(a => {
-            return {
-              name,
-              number: a.text.trim(),
-              isMobile: a.attributes["data-title"] === "Mobile"
-            };
-          });
-      })
-      .reduce((arr, cur) => arr.concat(cur), [])
-      .filter((p, i, a) => {
-        return (
-          p.number && a.findIndex(({ number }) => number === p.number) === i
-        );
-      });
+    return parseThatsThemData(res.data);
   } catch (err) {
-    err.thatsThem = true;
-    Sentry.captureException(err);
-    console.log("thatsthem error:", err);
+    throw new Error(err.message);
   }
+}
 
-  //  in the event of catastrophic failure, have an array.
-  return [];
-};
+function parseThatsThemData(html) {
+  const $ = cheerio.load(html);
+
+  //  iterate over each record a for a resident
+  return $('.ThatsThem-people-record.row')
+    .map((i, elem) => {
+      const row = $(elem);
+      const name = row.find('h2').text().trim();
+
+      //  iterate over each phone number for a given resident
+      return row.find('span[itemprop="telephone"]')
+        .map((i, a) => {
+          const link = $(a);
+          return {
+            name,
+            number: link.text().trim(),
+            isMobile: link.attr('data-title') === 'Mobile',
+          };
+        }).get();
+    })
+    //  flatten elements to array
+    .get()
+    //  flatten array
+    .reduce((arr, cur) => arr.concat(cur), [])
+    //  remove duplicated numbers
+    .filter((p, i, a) => {
+      return (
+        p.number && a.findIndex(({ number }) => number === p.number) === i
+      );
+    });
+}
 
 module.exports = {
   getThatsThemData,
   getThatsThemUrl
 };
+
+if (process.argv[1] === __filename) {
+  getThatsThemData('11106 S 108th E Ave, Bixby, OK')
+    .then((data) => console.log(data))
+    .catch((err) => console.error(err));
+}

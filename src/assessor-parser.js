@@ -30,9 +30,14 @@ function parseOwnerInfo($) {
     return !mailingAddress || !rawName || !houseNumber;
   });
 
+  //  no sense continuing if we can't validate their name/address
+  if (!mailingAddress || !rawName) {
+    throw new Error(`Missing crititcal data: ADDR: ${mailingAddress} NAME: ${rawName}`);
+  }
+
 
   //  is the site address present in mailing address?
-  let livesThere = mailingAddress.includes(houseNumber);
+  let livesThere = mailingAddress && mailingAddress.includes(houseNumber);
 
   //  if it's not, did they file homestead and do they use pobox?
   if (!livesThere) {
