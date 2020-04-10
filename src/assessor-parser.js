@@ -1,5 +1,6 @@
 const nameGuess = require("./name-guesser.js");
 const usesPOBox = require("./ups-locations.js");
+const debugTimer = require("./utils/debugTimer");
 
 const RE = {
   MAILING_ADDR: /owner mailing address/i,
@@ -9,6 +10,7 @@ const RE = {
 };
 
 function parseOwnerInfo($) {
+  const end = debugTimer("ASSESSOR PARSE");
   let mailingAddress;
   let rawName;
   let houseNumber;
@@ -54,6 +56,7 @@ function parseOwnerInfo($) {
     });
   }
 
+  end();
   return {
     mailingAddress,
     ownerName: rawName,

@@ -4,12 +4,14 @@ const getAssessorValues = require("./getAddress.js");
 const axios = require("axios");
 const { default: formurlencoded } = require("form-urlencoded");
 const parseOwnerInfo = require("./assessor-parser.js");
+const debugTimer = require("./utils/debugTimer");
 
 const ASSESSOR_URL =
   "https://assessor.tulsacounty.org/assessor-property-view.php";
 
 async function getOwnerData(address) {
   try {
+    const end = debugTimer("ASSESSOR FETCH");
     //  try to load form data first, otherwise we don't need to request
     const assessorFormData = formurlencoded(getAssessorValues(address));
 
@@ -50,6 +52,7 @@ async function getOwnerData(address) {
       $ = cheerio.load(res.data);
     }
 
+    end();
     return parseOwnerInfo($);
   } catch (err) {
     console.log("Assessor Fetch Fail:", err);
