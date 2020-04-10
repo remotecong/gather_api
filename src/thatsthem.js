@@ -37,33 +37,28 @@ function parseThatsThemData(html) {
 
   //  iterate over each record a for a resident
   const results = $(".ThatsThem-people-record.row")
-    .map((i, elem) => {
+    .toArray()
+    .reduce((coll, elem) => {
       const row = $(elem);
       const name = row.find("h2").text().trim();
 
       //  iterate over each phone number for a given resident
-      return row
-        .find('span[itemprop="telephone"]')
-        .map((i, span) => {
-          const link = $(span).parent();
-          return {
-            name,
-            number: link.text().trim(),
-            isMobile: link.attr("data-title") === "Mobile",
-          };
-        })
-        .get();
-    })
-    //  flatten elements to array
-    .get()
-    //  flatten array
-    .reduce((arr, cur) => arr.concat(cur), [])
-    //  remove duplicated numbers
-    .filter((p, i, a) => {
-      return p.number && a.findIndex(({ number }) => number === p.number) === i;
-    });
+      row.find('span[itemprop="telephone"]').each((i, span) => {
+        const link = $(span).parent();
+        const number = link.text().trim();
 
-  end($('title').text());
+        if (!coll.some((p) => p.number === number)) {
+          coll.push({
+            name,
+            number,
+            isMobile: link.attr("data-title") === "Mobile",
+          });
+        }
+      });
+      return coll;
+    }, []);
+
+  end($("title").text());
   return results;
 }
 
@@ -73,7 +68,7 @@ module.exports = {
 };
 
 if (process.argv[1] === __filename) {
-  const fs = require('fs');
+  const fs = require("fs");
 
   fs.readFile("tt.html", (err, data) => {
     if (err) {
