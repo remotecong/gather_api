@@ -65,16 +65,5 @@ function parseThatsThemData(html) {
 module.exports = {
   getThatsThemData,
   getThatsThemUrl,
+  parseThatsThemData,
 };
-
-if (process.argv[1] === __filename) {
-  const fs = require("fs");
-
-  fs.readFile("tt.html", (err, data) => {
-    if (err) {
-      console.error("FS READ ERR", err);
-      return;
-    }
-    console.log(parseThatsThemData(data));
-  });
-}

@@ -1,0 +1,317 @@
+<!doctype html>
+<html>
+	<head>
+	<meta charset="UTF-8">
+	<link rel="shortcut icon" href="http://tcawd/intranet/favicon.ico" />
+
+	<title>Property Search &mdash; Tulsa County Assessor</title>
+
+	<script src="./javascript/jquery-1.12.3.min.js"></script>
+<link href="./css/assessor.css" rel="stylesheet" />
+<link href="./css/jquery.lightbox-0.5.css" rel="stylesheet" />
+<link href="./css/data-tables.css" rel="stylesheet" />
+<link href="./css/buttons.css" rel="stylesheet" />
+	<link rel="stylesheet" type="text/css" href="./css/assessor_print.css" media="print">
+	</head>
+	<body>
+		<div id="container">
+			<header>
+				<a href="/">
+				<p>Assessor&nbsp;<br /><span class="subhead">John A. Wright</span></p>
+				</a>
+			</header>
+<div id="nav">
+<ul id="menu1" class="menu">
+<li title="For the Assessor and the County"><span class="sect">Home pages</span>
+<ul class="submenu" id="submenu0">
+<li><a href="/assessor-home.php" title="Tulsa County Assessor Home Page">Assessor Home</a></li>
+<li><a href="https://www.tulsacounty.org" title="Tulsa County Home Page [external link]" target="_blank">Tulsa County Home</a></li>
+</ul></li>
+<li title="Information about properties and taxes"><span class="sect">Information</span>
+<ul class="submenu" id="submenu1">
+<li><a href="/assessor-faq.php" title="Answers to frequently asked questions">FAQ</a></li>
+<li><a class="currpage" href="/assessor-property-search.php" title="Get information about Tulsa County properties">Property Search</a></li>
+<li><a href="/assessor-map-interactive.php" title="Interactive County map">Interactive Map</a></li>
+<li><a href="/assessor-maps.php" title="Maps that may help you">Static Maps</a></li>
+<li><a href="/assessor-tax-estimate-new.php" title="An easy to use tax calculator for estimating taxes">Tax Estimate</a></li>
+<li><a href="/assessor-new-homeowner.php" title="Information on tax exemptions available to homeowners and other helpful tips">New Homeowner</a></li>
+<li><a href="/assessor-open-records-request.php" title="Online Open Records Request Form">Open Records Request</a></li>
+<li><a href="/assessor-reproduction-policy.php" title="Reproduction Policy for Records requested from our office">Records Reproduction Policy</a></li>
+<li><a href="/assessor-yearly-reports.php" title="Value to Tulsa County properties">Assessment Rolls</a></li>
+</ul></li>
+<li title="Exemptions that may reduce your property taxes"><span class="sect">Exemptions</span>
+<ul class="submenu" id="submenu2">
+<li><a href="/assessor-homestead.php" title="Information on Homestead Exemption">Homestead</a></li>
+<li><a href="/assessor-additional-homestead.php" title="Information on Additional Homestead Exemption">Additional Homestead</a></li>
+<li><a href="/assessor-senior-valuation-limitation.php" title="Information on Senior Valuation Limitation">Senior Freeze</a></li>
+<li><a href="/assessor-circuit-breaker.php" title="Information on 538-H Circuit Breaker">Circuit Breaker</a></li>
+<li><a href="/assessor-veterans.php" title="Information on Veterans exemption">Veterans</a></li>
+<li><a href="/assessor-application-dates.php" title="When forms must be filed">Important Dates</a></li>
+<li><a href="/assessor-forms.php" title="Download blank forms">Download Forms</a></li>
+</ul></li>
+<li title="Additional information about properties and taxes"><span class="sect">Resources</span>
+<ul class="submenu" id="submenu3">
+<li><a href="/assessor-ad-valorem-property-taxes.php" title="Learn about your property taxes">Ad Valorem Property Taxes</a></li>
+<li><a href="/assessor-statistics-analysis.php" title="Statistical Analysis of Ad Valorem Taxes">Statistics and Analysis</a></li>
+<li><a href="/assessor-new-subdivisions.php" title="Map showing year by year plat filings">Plat Filings by Year</a></li>
+<li><a href="/assessor-county-government-video.php" title="Videos explaining the structure of county government in Oklahoma">County Government Videos</a></li>
+<li><a href="https://www.ok.gov/tax/All_Taxes/Ad_Valorem/Legislative_Information/index.html" title="All statutes and administrative rules that govern the Assessor's operations [external link]">Statutes and Rules</a></li>
+<li><a href="https://www.ok.gov/tax/All_Taxes/Ad_Valorem/General_Information/County_Contacts/index.html" title="Links to other county offices in Oklahoma">Other Counties</a></li>
+</ul></li>
+<li title="Other places to find us"><span class="sect">Community Outreach</span>
+<ul class="submenu" id="submenu4">
+<li><a href="/assessor-outreach-program.php" title="A description of our Community Outreach program">About the Program</a></li>
+<li><a href="/assessor-speaker.php" title="Assessor John A. Wright is available to speak at your function">Need a Speaker?</a></li>
+<li><a href="/assessor-calendar-of-events.php" title="Important dates for the Assessor's Office">Calendar of Events</a></li>
+</ul></li>
+<li title="Information about how our office operates"><span class="sect">Our Office</span>
+<ul class="submenu" id="submenu5">
+<li><a href="/assessor-our-commitment.php" title="Our commitment to you">Our Commitment</a></li>
+<li><a href="/assessor-biographies.php" title="Meet the Assessor">Assessor Biography</a></li>
+<li><a href="/assessor-assessment-process.php" title="How your property value is determined">Assessment Process</a></li>
+<li><a href="/assessor-appraiser-certification.php" title="The training we receive">Appraiser Accreditation</a></li>
+</ul></li>
+</ul>
+</div> <!-- nav -->
+<div class="alert center"><p>There are new appeal deadlines effective November 1, 2019. Please click <a href="https://www.assessor.tulsacounty.org/assessor-new-deadlines.php">here</a> for more information.</p></div>		<div id="content">
+<h2>Property Search</h2>
+<hr />
+<h3>Disclaimer</h3>
+<p>The Tulsa County Assessor's Office has made every effort to insure the accuracy of the data contained on this web site; however, this material may be slightly dated which could have an impact on its accuracy.</p><p>The information must be accepted and used by the recipient with the understanding that the data was developed and collected only for the purpose of establishing fair cash (market) value for ad valorem taxation.  Although changes may be made periodically to the tax laws, administrative rules and similar directives, these changes may not always be incorporated in the material on this web site.</p><p>The Tulsa County Assessor's Office assumes no liability for any damages incurred, whether directly or indirectly, incidental, punitive or consequential, as a result of any errors, omissions or discrepancies in any information published on this web site or by any use of this web site.</p>
+<hr />
+<form action="assessor-property-search.php" method="post" class="buttons buttonset"><button type="submit" name="accepted" class="positive">Start a new search</button> <button class="positive" onclick="history.go(-1); return false;">Return to results list</button></form>
+<hr />
+<!--[if gte IE 8]><p class="caveat" style="width:400px; text-align:center; margin:0 auto;">If you are using Internet Explorer 8 or higher, please make sure that Compatibility View is checked in the Tools menu before printing.</p><![endif]--><p  style="text-align:center;" class="donotprint"><input type="button" onclick="window.print();" value="Print this page" /></p>
+<div id="quick" class="propdata">
+<h4>Quick Facts</h4>
+<table>
+<tbody>
+	<tr><td>Account #</td><td>R58032843105020</td>
+<td rowspan="7" width="200px" valign="middle"><img src="https://www.assessor.tulsacounty.org/pictures/real/R58032843105020/2008_IMP_001_5-2-2008_AA.jpg" width="200px" /></td></tr>
+	<tr><td>Parcel #</td><td>58032-84-31-05020</td></tr>
+	<tr><td>Situs address</td><td><form method="post" action="assessor-parcel-mapping.php?parcel=58032843105020&amp;condo="><input type="hidden" name="parcel" value="58032843105020" /><input type="submit" value="Map it" /></form>11106 S 108 AV E  BIXBY 74008 </td></tr>
+	<tr><td>Owner name</td><td>CHRISTENSEN, JUSTIN D </td></tr>
+	<tr><td>Fair cash (market) value</td><td><form method="post" action="assessor-similar-properties.php?acct=R58032843105020"><input type="hidden" name="parcel" value="58032843105020" /><input type="submit" value="Similar properties" /></form>$146,605</td></tr>
+	<tr><td>Last year's taxes</td><td>$2,007</td></tr>
+	<tr><td>Legal description</td><td>Subdivision: SHANNONDALE<br /><br />Legal: LT 13 BLK 2<br /><br />Section: 31&nbsp;&nbsp;Township: 18&nbsp;&nbsp;Range: 14</td></tr>
+</tbody>
+</table>
+</div>
+<div id="rightcol">
+<div id="tax" class="propdata">
+<h4>Tax Information</h4>
+<table>
+<thead>
+	<tr><th></th><th>2018</th><th>2019</th><th>2020</th></tr>
+</thead>
+<tbody>
+	<tr><td>Fair cash (market) value</td><td class="number">$146,605</td><td class="number">$146,605</td><td class="number">&mdash;</td></tr>
+	<tr><td>Total taxable value (capped)</td><td class="number">$146,605</td><td class="number">$146,605</td><td class="number">&mdash;</td></tr>
+	<tr><td>Assessment ratio</td><td class="number">11%</td><td class="number">11%</td><td class="number">&mdash;</td></tr>
+	<tr><td>Gross assessed value</td><td class="number">$16,127</td><td class="number">$16,127</td><td class="number">&mdash;</td></tr>
+	<tr><td>Exemptions</td><td class="number">$-1,000</td><td class="number">$-1,000</td><td class="number">&mdash;</td></tr>
+	<tr><td>Net assessed value</td><td class="number">$15,127</td><td class="number">$15,127</td><td class="number">&mdash;</td></tr>
+	<tr><td>Tax rate</td><td class="check" colspan="3">BI-4A [BIXBY]</td></tr>
+	<tr><td>Tax rate mills</td><td class="number">131.43</td><td class="number">132.66</td><td class="number">&mdash;</td></tr>
+	<tr><td>Estimated taxes</td><td class="number">$1,988</td><td class="number">$2,007</td><td class="number">&mdash;*</td></tr>
+	<tr><td>Most recent <abbr title="Notice of Increase in Assessed Value of Real Estate">NOV</abbr></td><td class="check" colspan="3">March 7, 2017</td></tr>
+</tbody>
+</table>
+<p style="font-size:80%; margin-top:-10px;">* Estimated from 2019 millage rates</p>
+</div>
+<div id="taxdetail" class="propdata">
+<h4>Tax detail (2019 millages)</h4>
+<table>
+<thead>
+	<tr><th>&nbsp;</th><th>%</th><th>Mills</th><th>Dollars</th></tr>
+</thead>
+<tbody>
+	<tr><td>City-County Health</td><td class="number">1.9</td><td class="number">2.58</td><td class="number">$39.03</td></tr>
+	<tr><td>City-County Library</td><td class="number">4.0</td><td class="number">5.32</td><td class="number">$80.48</td></tr>
+	<tr><td>Tulsa Technology Center</td><td class="number">10.0</td><td class="number">13.33</td><td class="number">$201.64</td></tr>
+	<tr><td>Emergency Medical Service</td><td class="number">0.0</td><td class="number">0.00</td><td class="number">$0.00</td></tr>
+	<tr><td>Tulsa Community College</td><td class="number">5.4</td><td class="number">7.21</td><td class="number">$109.07</td></tr>
+	<tr><td>School Locally Voted</td><td class="number">26.5</td><td class="number">35.16</td><td class="number">$531.87</td></tr>
+	<tr><td>City Sinking</td><td class="number">9.9</td><td class="number">13.10</td><td class="number">$198.16</td></tr>
+	<tr><td>School County Wide Bldg</td><td class="number">3.9</td><td class="number">5.15</td><td class="number">$77.90</td></tr>
+	<tr><td>School County Wide ADA</td><td class="number">3.0</td><td class="number">4.00</td><td class="number">$60.51</td></tr>
+	<tr><td>School County Wide General</td><td class="number">27.2</td><td class="number">36.05</td><td class="number">$545.33</td></tr>
+	<tr><td>County Government</td><td class="number">8.1</td><td class="number">10.76</td><td class="number">$162.77</td></tr>
+</tbody>
+</table>
+</div>
+</div><!-- end of right column -->
+<div id="leftcol">
+<div id="general" class="propdata">
+<h4>General Information</h4>
+<table>
+<tbody>
+	<tr><td>Situs address</td><td>11106 S 108 AV E  BIXBY 74008</td>
+	<tr><td>Owner name</td><td>CHRISTENSEN, JUSTIN D </td></tr>
+	<tr><td>Owner mailing address</td><td>PO BOX 55555<br />BIXBY, OK 74008</td></tr>
+	<tr><td>Land area&dagger;</td><td>0.14 acres / 6,116 sq ft</td></tr>
+	<tr><td>Tax rate</td><td>BI-4A [BIXBY]</td></tr>
+	<tr><td>Legal description</td><td>Subdivision: SHANNONDALE<br /><br />Legal:&nbsp;LT 13 BLK 2<br /><br />Section:&nbsp;31&nbsp;&nbsp;Township:&nbsp;18&nbsp;&nbsp;Range:&nbsp;14</td></tr>
+	<tr><td>Zoning</td><td>RES SINGLE-FAMILY HIGH DENSITY DISTRICT [RS3]</td></tr>
+</tbody>
+</table>
+</div>
+<div id="value" class="propdata">
+<h4>Values</h4>
+<table>
+<thead>
+	<tr><th></th><th>2018</th><th>2019</th><th>2020</th></tr>
+</thead>
+<tbody>
+	<tr><td>Land value</td><td class="number">$22,781</td><td class="number">$22,781</td><td class="number">&mdash;</td></tr>
+	<tr><td>Improvements value</td><td class="number">$123,824</td><td class="number">$123,824</td><td class="number">&mdash;</td></tr>
+	<tr><td>Fair cash (market) value</td><td class="number">$146,605</td><td class="number">$146,605</td><td class="number">&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+<div id="adjustments" class="propdata">
+<h4>Exemptions claimed</h4>
+<table>
+<thead>
+	<tr><th></th><th>2018</th><th>2019</th><th>2020</th></tr>
+</thead>
+<tbody>
+	<tr><td><a href="assessor-homestead.php">Homestead</a></td><td class="check"><img src="images/check.png" height="15px" width="15px" /></td><td class="check"><img src="images/check.png" height="15px" width="15px" /></td><td class="check">-</td></tr>
+	<tr><td><a href="assessor-additional-homestead.php">Additional homestead</a></td><td class="check">&mdash;</td><td class="check">&mdash;</td><td class="check">&mdash;</td></tr>
+	<tr><td><a href="assessor-senior-valuation-limitation.php">Senior Valuation Limitation</a></td><td class="check">&mdash;</td><td class="check">&mdash;</td><td class="check">&mdash;</td></tr>
+	<tr><td><a href="assessor-veterans.php">Veteran</a></td><td class="check">&mdash;</td><td class="check">&mdash;</td><td class="check">&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+</div><!-- end of left column -->
+<br /><p class="caveat printonly center clear">(Continued on next page)</p>
+<div id="improvements" class="propdata">
+<h4>Improvements</h4>
+<table>
+<thead>
+	<tr style="font-size:80%;"><th>Bldg ID#</th><th>Property type</th><th>Condition</th><th>Quality</th><th>Year built</th><th>Livable&dagger;</th><th>Stories</th><th>Foundation</th><th>Exterior</th><th>Roof</th><th>Baths</th><th>HVAC</th></tr>
+</thead>
+<tbody>
+	<tr>
+					<td>1</td>
+					<td>Residential</td>
+					<td>Good</td>
+					<td>Average</td>
+					<td>1991</td>
+					<td>1,695 SF</td>
+					<td>1.5</td><td>Slab</td>
+					<td>Frame Masonry Veneer</td>
+					<td>Composition Shingle</td><td>2.1</td><td>Cool Air in Heat Ducts</td>
+					</tr>
+</tbody>
+</table>
+</div>
+<div id="sales" class="propdata">
+<h4>Sales/Documents</h4>
+<table>
+<thead>
+	<tr><th>Date</th><th>Grantor</th><th>Grantee</th><th>Price</th><th>Doc type</th><th>Book-Page/Doc#</th></tr>
+</thead>
+<tbody>
+	<tr><td>Jul 30, 2012</td><td>RAINWATER, KEITH ANTHONY & LAUREN L</td><td>CHRISTENSEN, JUSTIN D</td><td>$134,500</td><td>General Warranty Deed</td><td>2012075620</td></tr>
+	<tr><td>Mar 26, 2010</td><td>RAINWATER, KEITH ANTHONY </td><td>RAINWATER, KEITH ANTHONY & LAUREN L </td><td>$&mdash;</td><td>Quit Claim Deed</td><td>2010026889</td></tr>
+	<tr><td>Mar 1, 2007</td><td>BAYLES, STEVEN</td><td>RAINWATER, KEITH ANTHONY</td><td>$137,500</td><td>General Warranty Deed</td><td>2007030572</td></tr>
+	<tr><td>Dec 1, 1991</td><td></td><td></td><td>$13,500</td><td>History</td><td>05370-01632</td></tr>
+</tbody>
+</table>
+</div>
+<div id="images" class="propdata">
+<h4>Images</h4>
+<table>
+<tbody>
+	<tr><td>Photo/sketch<br /><span class="caveat">(Click to enlarge)</span></td><td><a class="lightbox" href="https://www.assessor.tulsacounty.org/pictures/real/R58032843105020/2008_IMP_001_5-2-2008_AA.jpg"><img src="https://www.assessor.tulsacounty.org/pictures/real/R58032843105020/2008_IMP_001_5-2-2008_AA.jpg" width="125px" /></a> <a class="lightbox" href="https://www.assessor.tulsacounty.org/sketches/real/R58032843105020/2008_IMP_001_9-28-2008_-1.jpg"><img src="https://www.assessor.tulsacounty.org/sketches/real/R58032843105020/2008_IMP_001_9-28-2008_-1.jpg" width="125px" /></a> </td></tr>
+</tbody>
+</table>
+</div>
+<p class="caveat">&dagger; Square footage and acreage values included in this record are approximations.  They may not reflect what a licensed surveyor would determine by performing a formal survey.  They are for tax purposes only and are not intended for use in making conveyances or for preparing legal descriptions of properties.</p><hr /><!--[if gte IE 8]><p class="caveat" style="width:400px; text-align:center; margin:0 auto;">If you are using Internet Explorer 8 or higher, please make sure that Compatibility View is checked in the Tools menu before printing.</p><![endif]--><p  style="text-align:center;" class="donotprint"><input type="button" onclick="window.print();" value="Print this page"></p>
+<hr /><div id="map_canvas" style="z-index:1;"></div>
+<div id="gm" class="center" style="padding:5px;"></div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin=""/><script src="./javascript/leaflet.js"></script><script>
+	var Esri_WorldStreetMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, METI, TomTom, 2012'});
+	var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'});
+
+	var baseLayers =
+	{
+		"Streets": Esri_WorldStreetMap,
+		"Satellite": Esri_WorldImagery
+	};
+
+	var bob = L.geoJSON([{ "type": "Feature", "properties": { "ACCOUNTNO": "R58032843105020", "ACCTTYPE": "Residential" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -95.857781301587309, 36.002211489470184 ], [ -95.857780890399781, 36.002351803630596 ], [ -95.857780745578211, 36.002441429609476 ], [ -95.857497236370904, 36.002361821658788 ], [ -95.857499149567559, 36.002357328322411 ], [ -95.857500868605953, 36.002352783469426 ], [ -95.857502391395542, 36.002348192636596 ], [ -95.857503716081112, 36.002343561417113 ], [ -95.857504841048737, 36.002338895453455 ], [ -95.857505764927879, 36.002334200430312 ], [ -95.857506486592953, 36.002329482067942 ], [ -95.857507005164749, 36.002324746114866 ], [ -95.857507320011521, 36.002319998341164 ], [ -95.857507430749692, 36.002315244531253 ], [ -95.857507337244414, 36.002310490476923 ], [ -95.857507039609615, 36.002305741970225 ], [ -95.857506538207971, 36.002301004796557 ], [ -95.857505833650393, 36.00229628472735 ], [ -95.857504926795301, 36.002291587513319 ], [ -95.857503818747617, 36.002286918877296 ], [ -95.857502510857344, 36.002282284507267 ], [ -95.857501004717975, 36.002277690049517 ], [ -95.85749930216457, 36.002273141101647 ], [ -95.857497405271431, 36.00226864320588 ], [ -95.857495316349642, 36.002264201842188 ], [ -95.857493037944295, 36.002259822421621 ], [ -95.857490572831296, 36.002255510279895 ], [ -95.857487924014023, 36.002251270670627 ], [ -95.857485094719678, 36.002247108759178 ], [ -95.857482088395329, 36.002243029616118 ], [ -95.85747890870374, 36.002239038211272 ], [ -95.857475559518903, 36.002235139407539 ], [ -95.85747204492128, 36.002231337954989 ], [ -95.857468369192873, 36.002227638485081 ], [ -95.857464536812031, 36.002224045505059 ], [ -95.85746055244789, 36.002220563392399 ], [ -95.857456420954819, 36.002217196389481 ], [ -95.857450274365476, 36.002212594703785 ], [ -95.857781301587309, 36.002211489470184 ] ] ] } },],
+	{
+		color: '#A63223',
+		weight: 5,
+		fill:false
+	});
+
+	var map = L.map('map_canvas',
+	{
+		center: [36.12, -95.99],
+		minZoom: 10,
+		maxZoom: 18,
+		zoom: 16,
+		layers: [Esri_WorldStreetMap]
+	});
+
+	L.control.scale().addTo(map);
+	L.control.layers(baseLayers).addTo(map);
+	var bobbounds = bob.getBounds();
+	map.fitBounds(bobbounds);
+	map.setZoom(map.getZoom() - 1);
+
+	bob.addTo(map);
+
+	map.on('zoomend', function(e)
+	{
+	   updateGoogleLink();
+	});
+
+	map.on('moveend', function(e)
+	{
+	   updateGoogleLink();
+	});
+
+	function updateGoogleLink()
+	{
+		var mapzoom = map.getZoom();
+		var mapcenter = map.getCenter();
+		var maplink = '<a href="https://www.google.com/maps/@?api=1&map_action=map&center=' + mapcenter.lat + ',' + mapcenter.lng + '&zoom=' + mapzoom + '" target="_blank">Click to view this area on the <b>Google Maps web page</b> in a new window</a><hr />';
+		$("#gm").html(maplink);
+		return;
+	};
+
+</script>
+<form action="assessor-property-search.php" method="post" class="buttons buttonset"><button type="submit" name="accepted" class="positive">Start a new search</button> <button class="positive" onclick="history.go(-1); return false;">Return to results list</button></form>
+			<footer>
+				<p>John A. Wright &mdash; Tulsa County Assessor</p>
+				<p>Tulsa County Administration Building, Room 215&nbsp;&nbsp;|&nbsp;&nbsp;500 S. Denver&nbsp;&nbsp;|&nbsp;&nbsp;Tulsa, OK 74103</p>
+				<p>Phone: (918) 596-5100&nbsp;&nbsp;|&nbsp;&nbsp;Fax: (918) 596-4799&nbsp;&nbsp;|&nbsp;&nbsp;Email:&nbsp;<a href="mailto:assessor@tulsacounty.org">assessor@tulsacounty.org</a></p>
+				<p>Office hours: 8:00&ndash;5:00 Monday&ndash;Friday (excluding holidays)</p>
+			</footer>
+
+		</div> <!-- content -->
+
+		<div class="clear">&nbsp;</div>
+
+	</div> <!-- container -->
+	<script src="./javascript/jquery.cookie.js" type="text/javascript"></script>
+	<script src="https://maps.google.com/maps/api/js?key=AIzaSyDw_j6TtHFW-dcNsOsBqMIwhr7ns3_jEF8"></script>
+	<script src="./javascript/jquery.dataTables.min.js"></script>
+	<script src="./javascript/assessor_property.js"></script>
+	<script src="./javascript/jquery.lightbox-0.5.min.js"></script>
+	<script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-17700846-1']);
+	  _gaq.push(['_trackPageview']);
+	  (function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+	</script>
+	</body>
+</html>

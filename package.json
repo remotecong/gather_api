@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index",
-    "test": "tape test/getAddress.spec.js"
+    "test": "tape test/**/*.js"
   },
   "author": "@dillonchr",
   "license": "GPL-2.0",

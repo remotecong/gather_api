@@ -66,16 +66,3 @@ function parseOwnerInfo($) {
 }
 
 module.exports = parseOwnerInfo;
-
-if (process.argv[1] === __filename) {
-  const fs = require("fs");
-  const cheerio = require("cheerio");
-
-  fs.readFile("/Users/dillon/git/gather-py/assessor.html", (err, data) => {
-    if (err) {
-      console.error("FS READ ERR", err);
-      return;
-    }
-    console.log(parseOwnerInfo(cheerio.load(data)));
-  });
-}
