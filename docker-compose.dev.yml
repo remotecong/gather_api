@@ -1,15 +1,15 @@
 version: '2'
 
 services:
-  ui:
+  api:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: gather_api
     volumes:
       - .:/code/
       - /code/node_modules/
-    environment:
-      - REACT_APP_API_URL=http://localhost:7712
+    env_file: .env
     ports:
       - 7712:3000
+  redis:
+      image: redis:5.0.6-alpine

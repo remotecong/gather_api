@@ -1,7 +1,8 @@
-FROM buildkite/puppeteer:v1.6.2
+FROM node:13.12.0-stretch-slim
+RUN yarn global add nodemon
 WORKDIR /code/
-COPY package*.json ./
-RUN npm i -g nodemon && npm i > /dev/null
+COPY package.json yarn.lock ./
+RUN yarn
 COPY . .
-CMD nodemon index.js
 EXPOSE 3000
+CMD nodemon src/index.js
