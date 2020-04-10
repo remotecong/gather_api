@@ -1,23 +1,16 @@
 const Sentry = require("@sentry/node");
 const { getThatsThemData, getThatsThemUrl } = require("./thatsthem.js");
-const getAssessorValues = require("./getAddress.js");
-const { getCachedSearch, cacheSearch } = require("./cache.js");
-const MAX_REQ_TIMEOUT = 10000;
-const getOwnerData = require("./assessor");
+const { getCachedJSON, cacheJSON } = require("./utils/cache.js");
+const getOwnerData = require("./owner-lookups/tulsa/assessor");
 
 module.exports = async (address) => {
   if (!address) {
     return { error: "Missing address" };
   }
 
-  const cachedResults = await getCachedSearch(address);
+  const cachedResults = await getCachedJSON(address);
   if (cachedResults) {
     return cachedResults;
-  }
-
-  const assessorValues = getAssessorValues(address);
-  if (!assessorValues || assessorValues.error) {
-    return assessorValues || { error: "Couldn't parse address for assessor" };
   }
 
   try {
@@ -37,10 +30,12 @@ module.exports = async (address) => {
       phones,
       thatsThemUrl: getThatsThemUrl(address),
     };
+
     //  not caching if thatsthem fails to load
     if (phoneData && phoneData.length) {
-      cacheSearch(address, results);
+      cacheJSON(address, results);
     }
+
     return results;
   } catch (err) {
     Sentry.withScope((scope) => {

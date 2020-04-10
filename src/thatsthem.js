@@ -1,7 +1,7 @@
 const Sentry = require("@sentry/node");
 const cheerio = require("cheerio");
 const axios = require("axios");
-const debugTimer = require("./utils/debugTimer");
+const { getCachedJSON, cacheJSON } = require("./utils/cache.js");
 
 const getThatsThemUrl = (address) =>
   `https://thatsthem.com/address/${address
@@ -11,8 +11,13 @@ const getThatsThemUrl = (address) =>
 
 async function getThatsThemData(address) {
   try {
-    const end = debugTimer("THATSTHEM FETCH");
     const url = getThatsThemUrl(address);
+    const cachedNumbers = await getCachedJSON(url);
+
+    if (cachedNumbers) {
+      return cachedNumbers;
+    }
+
     Sentry.configureScope((scope) => {
       scope.setTag("tt_url", url);
     });
@@ -24,19 +29,19 @@ async function getThatsThemData(address) {
       },
     });
 
-    end();
-    return parseThatsThemData(res.data);
+    const numbers = parseThatsThemData(res.data);
+    cacheJSON(url, numbers);
+    return numbers;
   } catch (err) {
     throw new Error(err.message);
   }
 }
 
 function parseThatsThemData(html) {
-  const end = debugTimer("THATSTHEM PARSE");
   const $ = cheerio.load(html);
 
   //  iterate over each record a for a resident
-  const results = $(".ThatsThem-people-record.row")
+  return $(".ThatsThem-people-record.row")
     .toArray()
     .reduce((coll, elem) => {
       const row = $(elem);
@@ -57,9 +62,6 @@ function parseThatsThemData(html) {
       });
       return coll;
     }, []);
-
-  end($("title").text());
-  return results;
 }
 
 module.exports = {

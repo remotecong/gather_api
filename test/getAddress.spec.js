@@ -1,5 +1,5 @@
 const test = require("tape");
-const getAddress = require("../src/getAddress");
+const getAddress = require("../src/owner-lookups/tulsa/getAddress");
 
 test("does normal addresses", (t) => {
   const addr = getAddress("601 W Chestnut St, Broken Arrow, 74013");

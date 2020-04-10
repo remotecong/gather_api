@@ -4,18 +4,24 @@ const getAssessorValues = require("./getAddress.js");
 const axios = require("axios");
 const { default: formurlencoded } = require("form-urlencoded");
 const parseOwnerInfo = require("./assessor-parser.js");
-const debugTimer = require("./utils/debugTimer");
 
-const ASSESSOR_URL =
-  "https://assessor.tulsacounty.org/assessor-property-view.php";
+const ASSESSOR_URL = "/assessor-property-view.php";
+
+const assessorAxios = axios.create({
+  baseURL: "https://assessor.tulsacounty.org/",
+  timeout: 9999,
+  headers: {
+    "User-Agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:74.0) Gecko/20100101 Firefox/74.0",
+  },
+});
 
 async function getOwnerData(address) {
   try {
-    const end = debugTimer("ASSESSOR FETCH");
     //  try to load form data first, otherwise we don't need to request
     const assessorFormData = formurlencoded(getAssessorValues(address));
 
-    let res = await axios.get(ASSESSOR_URL);
+    let res = await assessorAxios.get(ASSESSOR_URL);
 
     if (res.status >= 400) {
       throw Error(res.statusText);
@@ -27,11 +33,9 @@ async function getOwnerData(address) {
       throw Error("no cookies");
     }
 
-    res = await axios({
+    res = await assessorAxios({
       url: ASSESSOR_URL,
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:74.0) Gecko/20100101 Firefox/74.0",
         cookie: phpSessionCookies,
       },
       method: "post",
@@ -46,23 +50,18 @@ async function getOwnerData(address) {
 
     if (accounts && accounts.length) {
       //  select first duplicate entry
-      res = await axios.get(
-        `https://assessor.tulsacounty.org/${accounts.first().attr("goto")}`
-      );
+      res = await assessorAxios.get(accounts.first().attr("goto"));
       $ = cheerio.load(res.data);
     }
 
-    end();
     return parseOwnerInfo($);
   } catch (err) {
+    Sentry.withScope((scope) => {
+      scope.setTag("assessor-raw-address", address);
+      Sentry.captureException(err);
+    });
     console.log("Assessor Fetch Fail:", err);
   }
 }
 
 module.exports = getOwnerData;
-
-if (process.argv[1] === __filename) {
-  getOwnerData("11221 S 106th E Ave, Bixby, OK").then((data) => {
-    console.log(data);
-  });
-}

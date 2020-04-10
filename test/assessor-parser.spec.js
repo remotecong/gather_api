@@ -1,5 +1,5 @@
 const test = require("tape");
-const parseOwnerInfo = require("../src/assessor-parser");
+const parseOwnerInfo = require("../src/owner-lookups/tulsa/assessor-parser");
 const cheerio = require("cheerio");
 const fs = require("fs");
 

@@ -8,9 +8,9 @@ const client = redis.createClient({
 const _getVal = promisify(client.get, { context: client });
 const _setVal = promisify(client.setex, { context: client });
 
-const getCachedSearch = async (address) => {
+const getCachedJSON = async (id) => {
   try {
-    const data = await _getVal(address);
+    const data = await _getVal(id);
     return JSON.parse(data);
   } catch (err) {
     Sentry.captureException(err);
@@ -18,15 +18,15 @@ const getCachedSearch = async (address) => {
   }
 };
 
-const cacheSearch = async (address, results) => {
+const cacheJSON = async (id, data) => {
   try {
-    return _setVal(address, 3600, JSON.stringify(results));
+    return await _setVal(id, 3600, JSON.stringify(data));
   } catch (err) {
     Sentry.captureException(err);
   }
 };
 
 module.exports = {
-  getCachedSearch,
-  cacheSearch,
+  getCachedJSON,
+  cacheJSON,
 };
