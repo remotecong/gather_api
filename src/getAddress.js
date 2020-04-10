@@ -13,10 +13,10 @@ const STREET_TYPES = [
   { options: ["highway", "hwy"], value: "HY" },
   { options: ["terrace", "tr"], value: "TE" },
   { options: ["trail", "tl"], value: "TL" },
-  { options: ["way", "wy"], value: "WY" }
+  { options: ["way", "wy"], value: "WY" },
 ];
 
-const getAssessorValues = address => {
+const getAssessorValues = (address) => {
   //  1234 N Main St, City Name, ST
   const assessorAddress = address
     //  get rid of unit numbers
@@ -40,7 +40,7 @@ const getAssessorValues = address => {
     return {
       error: `Bad address "${assessorAddress}"`,
       input: address,
-      decoded: assessorPieces
+      decoded: assessorPieces,
     };
   }
 
@@ -52,29 +52,28 @@ const getAssessorValues = address => {
   const streetTypeValue = assessorPieces[5].toLowerCase();
   const streetType = (
     STREET_TYPES.find(
-      t =>
+      (t) =>
         t.options.includes(streetTypeValue) ||
-        t.options.some(o => o.includes(streetTypeValue))
+        t.options.some((o) => o.includes(streetTypeValue))
     ) || { value: "ST" }
   ).value;
 
-
   return {
-    ln: '',
-    fn: '',
-    srchbox: 'on',
+    ln: "",
+    fn: "",
+    srchbox: "on",
     streetno: houseNumber,
     predirection: direction,
     streetname: streetName,
     streettype: streetType,
-    subaddr: 'Search+by+address',
-    subdivname: '',
-    subdivnum: '',
-    subdivlot: '',
-    subdivblk: '',
-    account: '',
-    parcel: '',
-    accepted: 'accepted',
+    subaddr: "Search+by+address",
+    subdivname: "",
+    subdivnum: "",
+    subdivlot: "",
+    subdivblk: "",
+    account: "",
+    parcel: "",
+    accepted: "accepted",
   };
 };
 

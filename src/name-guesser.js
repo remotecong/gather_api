@@ -1,8 +1,8 @@
-const getLastName = rawName => {
+const getLastName = (rawName) => {
   const lastName = rawName
     .replace(/( the| ttee| revocable| rev| trustee| trust| Living| \d+)/gi, "")
     .split(",")
-    .map(s => s.trim())
+    .map((s) => s.trim())
     .shift();
 
   if (lastName.match(/\s/g)) {

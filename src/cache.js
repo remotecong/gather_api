@@ -2,13 +2,13 @@ const Sentry = require("@sentry/node");
 const redis = require("redis");
 const { promisify } = require("bluebird");
 const client = redis.createClient({
-  host: "redis"
+  host: "redis",
 });
 
 const _getVal = promisify(client.get, { context: client });
 const _setVal = promisify(client.setex, { context: client });
 
-const getCachedSearch = async address => {
+const getCachedSearch = async (address) => {
   try {
     const data = await _getVal(address);
     return JSON.parse(data);
@@ -28,5 +28,5 @@ const cacheSearch = async (address, results) => {
 
 module.exports = {
   getCachedSearch,
-  cacheSearch
+  cacheSearch,
 };

@@ -5,7 +5,7 @@ const { getCachedSearch, cacheSearch } = require("./cache.js");
 const MAX_REQ_TIMEOUT = 10000;
 const getOwnerData = require("./assessor");
 
-module.exports = async address => {
+module.exports = async (address) => {
   if (!address) {
     return { error: "Missing address" };
   }
@@ -17,7 +17,7 @@ module.exports = async address => {
 
   const assessorValues = getAssessorValues(address);
   if (!assessorValues || assessorValues.error) {
-    return assessorValues || {error: "Couldn't parse address for assessor"};
+    return assessorValues || { error: "Couldn't parse address for assessor" };
   }
 
   try {
@@ -35,7 +35,7 @@ module.exports = async address => {
     const results = {
       ...ownerData,
       phones,
-      thatsThemUrl: getThatsThemUrl(address)
+      thatsThemUrl: getThatsThemUrl(address),
     };
     //  not caching if thatsthem fails to load
     if (phoneData && phoneData.length) {
@@ -43,7 +43,7 @@ module.exports = async address => {
     }
     return results;
   } catch (err) {
-    Sentry.withScope(scope => {
+    Sentry.withScope((scope) => {
       scope.setTag("query", address);
       Sentry.captureException(err);
     });
