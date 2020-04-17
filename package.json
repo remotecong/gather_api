@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index",
-    "test": "tape test/**/*.js"
+    "test": "jest --ci --coverage"
   },
   "author": "@dillonchr",
   "license": "GPL-2.0",
@@ -19,6 +19,6 @@
     "redis": "^2.8.0"
   },
   "devDependencies": {
-    "tape": "^4.9.1"
+    "jest": "^25.3.0"
   }
 }
