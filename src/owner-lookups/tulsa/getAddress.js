@@ -1,3 +1,5 @@
+const { parseLocation: parseAddress } = require('parse-address');
+
 const STREET_TYPES = [
   { options: ["street"], value: "ST" },
   { options: ["avenue"], value: "AV" },
@@ -17,44 +19,25 @@ const STREET_TYPES = [
 ];
 
 const getAssessorValues = (address) => {
-  //  1234 N Main St, City Name, ST
-  const assessorAddress = address
-    //  get rid of unit numbers
-    .replace(/\s#\d+/, "")
-    //  ditch everything after the first comma
-    .split(",")
-    //  just give me the street address, we know it's in tulsa
-    .shift()
-    //  strip away all periods (e.g. "S.")
-    .replace(/\./g, "")
-    //  strip trailing direction
-    .replace(/[NSEW]$/, "")
-    .trim();
-  //  grab house number, direction, street name, sub-direction (to ignore) and street type
-  const assessorPieces = assessorAddress.match(
-    /(\d+) ([NSEW]) ([\w\s]+) ([NSEW]\s)?([A-Za-z]+)( [NSEW])?$/i
-  );
+  const { number: houseNumber, street, prefix: direction, type } = parseAddress(address);
 
-  //  it either works perfectly or not at all
-  if (!assessorPieces || assessorPieces.length < 6) {
+  if (!houseNumber || !street || !direction || !type) {
     return {
-      error: `Bad address "${assessorAddress}"`,
+      error: `Bad address "${address}"`,
       input: address,
-      decoded: assessorPieces,
+      decoded: parseAddress(address),
     };
   }
 
   //  clean up pieces with names
-  const houseNumber = assessorPieces[1];
-  const direction = assessorPieces[2];
-  const streetName = assessorPieces[3];
+  const streetName = street.replace(/ [NEWS]$/, '');
   //  data massage the street type to match available types in Assessor search
-  const streetTypeValue = assessorPieces[5].toLowerCase();
+  const streetTypeValue = type.toLowerCase();
   const streetType = (
     STREET_TYPES.find(
       (t) =>
-        t.options.includes(streetTypeValue) ||
-        t.options.some((o) => o.includes(streetTypeValue))
+      t.options.includes(streetTypeValue) ||
+      t.options.some((o) => o.includes(streetTypeValue))
     ) || { value: "ST" }
   ).value;
 
