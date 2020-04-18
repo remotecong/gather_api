@@ -60,6 +60,10 @@ async function getThatsThemData(address) {
 function parseThatsThemData(html) {
   const $ = cheerio.load(html);
 
+  if (!$.root().children().length) {
+    throw new Error('thatsthem php error thrown');
+  }
+
   //  iterate over each record a for a resident
   return $(".ThatsThem-people-record.row")
     .toArray()
