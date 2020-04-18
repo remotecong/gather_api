@@ -58,11 +58,11 @@ async function getThatsThemData(address) {
 }
 
 function parseThatsThemData(html) {
-  const $ = cheerio.load(html);
-
-  if (!$.root().children().length) {
+  if (/<b>Fatal error<\/b>/.test(html)) {
     throw new Error('thatsthem php error thrown');
   }
+
+  const $ = cheerio.load(html);
 
   //  iterate over each record a for a resident
   return $(".ThatsThem-people-record.row")
