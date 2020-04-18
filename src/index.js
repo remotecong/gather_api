@@ -2,7 +2,11 @@ const http = require("http");
 const { parse } = require("url");
 const gather = require("./gather");
 const Sentry = require("@sentry/node");
-Sentry.init({ dsn: process.env.SENTRY_URL });
+
+Sentry.init({
+  dsn: process.env.SENTRY_URL,
+  environment: process.env.NODE_ENV || "dev",
+});
 
 function getIp(req) {
   try {
@@ -22,6 +26,7 @@ http
       res.setHeader("Access-Control-Request-Method", "*");
       res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET");
       res.setHeader("Access-Control-Allow-Headers", "*");
+
       const query = parse(req.url, true).query;
 
       Sentry.configureScope((scope) => {
@@ -49,11 +54,14 @@ http
       res.writeHead(200, {
         "Content-Type": "application/json",
       });
+
       res.end(JSON.stringify(data));
     } catch (err) {
+
       console.log(err);
-      res.writeHead(500);
       Sentry.captureException(err);
+
+      res.writeHead(500);
       res.end("{}");
     }
   })

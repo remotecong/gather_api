@@ -4,19 +4,22 @@
   "description": "phone and letter territory information gatherer",
   "main": "src/index.js",
   "scripts": {
+    "test-dev": "docker exec -it gather_api npx jest --watchAll",
     "start": "node src/index",
     "test": "jest --ci --coverage"
   },
   "author": "@dillonchr",
   "license": "GPL-2.0",
   "dependencies": {
+    "@dillonchr/tor-manager": "^0.0.1",
     "@sentry/node": "5.7.0",
     "axios": "^0.19.2",
     "bluebird": "^3.7.2",
     "cheerio": "^1.0.0-rc.3",
     "form-urlencoded": "^4.1.3",
     "parse-address": "^1.1.2",
-    "redis": "^2.8.0"
+    "redis": "^2.8.0",
+    "socks-proxy-agent": "^4.0.2"
   },
   "devDependencies": {
     "jest": "^25.3.0"

@@ -1,5 +1,5 @@
 const Sentry = require("@sentry/node");
-const { getThatsThemData, getThatsThemUrl } = require("./thatsthem.js");
+const { getPhoneNumbers, getThatsThemUrl } = require("./thatsthem");
 const { getCachedJSON, cacheJSON } = require("./utils/cache.js");
 const getOwnerData = require("./owner-lookups/tulsa/assessor");
 
@@ -16,7 +16,7 @@ module.exports = async (address) => {
   try {
     const [ownerData, phoneData] = await Promise.all([
       getOwnerData(address),
-      getThatsThemData(address),
+      getPhoneNumbers(address),
     ]);
 
     const phones = phoneData.filter((p, i) => {
