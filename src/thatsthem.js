@@ -1,13 +1,26 @@
+const { parseLocation: parseAddress } = require('parse-address');
 const Sentry = require("@sentry/node");
 const cheerio = require("cheerio");
 const axios = require("axios");
 const { getCachedJSON, cacheJSON } = require("./utils/cache.js");
 
-const getThatsThemUrl = (address) =>
-  `https://thatsthem.com/address/${address
+//  PHPSESSIONID, to let tt track the scraper
+let cookie = "";
+
+const getThatsThemUrl = (address) => {
+  const { number, prefix, street, type, city } = parseAddress(address);
+
+  //  not sure if it's possible to have city and not state
+  //  but if the city's missing let's assume it's Tulsa for now
+  if (!city) {
+    address = `${number} ${prefix} ${street} ${type}, Tulsa, OK`
+  }
+
+  return `https://thatsthem.com/address/${address
     .replace(/\s#\d+/, "")
     .replace(/\./g, "")
     .replace(/,? /g, "-")}`;
+};
 
 async function getThatsThemData(address) {
   try {
@@ -26,8 +39,15 @@ async function getThatsThemData(address) {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:74.0) Gecko/20100101 Firefox/74.0",
+        cookie,
       },
     });
+
+    //  keep session active
+    if (res.headers["set-cookie"]) {
+      const phpCookie = res.headers["set-cookie"].find((c) => /^PHPSESSID/.test(c));
+      cookie = phpCookie.split(" ")[0].trim();
+    }
 
     const numbers = parseThatsThemData(res.data);
     cacheJSON(url, numbers);
@@ -38,6 +58,10 @@ async function getThatsThemData(address) {
 }
 
 function parseThatsThemData(html) {
+  if (/<b>Fatal error<\/b>/.test(html)) {
+    throw new Error('thatsthem php error thrown');
+  }
+
   const $ = cheerio.load(html);
 
   //  iterate over each record a for a resident

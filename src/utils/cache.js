@@ -20,7 +20,7 @@ const getCachedJSON = async (id) => {
 
 const cacheJSON = async (id, data) => {
   try {
-    return await _setVal(id, 3600, JSON.stringify(data));
+    return await _setVal(id, 3600 * 36, JSON.stringify(data));
   } catch (err) {
     Sentry.captureException(err);
   }
