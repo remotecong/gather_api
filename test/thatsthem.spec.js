@@ -45,6 +45,10 @@ test("good lookup finds numbers", (done) => {
       results = parseThatsThemData(html);
     }).not.toThrow();
 
+    expect(results[0].name).toBe('Jara G Doe');
+    expect(results[0].number).toBe('918-555-5838');
+    expect(results[0].isMobile).toBeTruthy();
+
     done();
   });
 });
