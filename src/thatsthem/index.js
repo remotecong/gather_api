@@ -12,7 +12,8 @@ async function getPhoneNumbers(address) {
     cacheJSON(url, numbers);
     return numbers;
   } catch (thatsThemError) {
-    Sentry.captureException(thatsThemError);
+    const captureError = new Error(thatsThemError.message + ' ' + address);
+    Sentry.captureException(captureError);
     return [];
   }
 }
