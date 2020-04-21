@@ -38,9 +38,10 @@ module.exports = async (address) => {
 
     return results;
   } catch (err) {
+    const captureError = new Error(err.message + ' ' + address);
     Sentry.withScope((scope) => {
       scope.setTag("query", address);
-      Sentry.captureException(err);
+      Sentry.captureException(captureError);
     });
 
     return { error: err.message };

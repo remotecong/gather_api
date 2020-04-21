@@ -54,13 +54,18 @@ async function getOwnerData(address) {
       $ = cheerio.load(res.data);
     }
 
+    if (/No properties were found/.test(res.data)) {
+      throw new Error("address not found in county assessor");
+    }
+
     return parseOwnerInfo($);
   } catch (err) {
     Sentry.withScope((scope) => {
       scope.setTag("assessor-raw-address", address);
       Sentry.captureException(err);
     });
-    console.log("Assessor Fetch Fail:", err);
+
+    throw err;
   }
 }
 
