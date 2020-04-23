@@ -19,13 +19,7 @@ jobs:
           command: |
             echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
             docker push remotecong/$IMAGE_NAME:$TAG
-  deploy:
-    branches:
-      ignore:
-        - master
-    steps:
       - run:
           name: deploy
           command: |
             ssh -o StrictHostKeyChecking=no rowsdower@gl.itch.space "/bin/bash ./deploy_app.sh remotecong/$IMAGE_NAME:$TAG stage_api"
-
