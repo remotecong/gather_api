@@ -61,8 +61,9 @@ async function getOwnerData(address) {
     return parseOwnerInfo($);
   } catch (err) {
     Sentry.withScope((scope) => {
+      const captureException = new Error(err.message + ' ' + address);
       scope.setTag("assessor-raw-address", address);
-      Sentry.captureException(err);
+      Sentry.captureException(captureException);
     });
 
     throw err;
