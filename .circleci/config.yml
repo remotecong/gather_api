@@ -22,4 +22,4 @@ jobs:
       - run:
           name: deploy
           command: |
-            ssh -o StrictHostKeyChecking=no rowsdower@gl.itch.space "/bin/bash ./deploy_app.sh remotecong/$IMAGE_NAME:$TAG stage_api"
+            ssh -o StrictHostKeyChecking=no rowsdower@gl.itch.space "/bin/bash ./deploy_api.sh remotecong/$IMAGE_NAME:$TAG stage_api"
