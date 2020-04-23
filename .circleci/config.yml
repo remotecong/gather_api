@@ -5,18 +5,27 @@ jobs:
     steps:
       - checkout
       - run:
-          name: setup env
-          command: |
-            echo 'export TAG=${CIRCLE_BRANCH}' >> $BASH_ENV
-            echo 'export IMAGE_NAME=gather_api' >> $BASH_ENV
+        name: setup env
+        command: |
+          echo 'export TAG=${CIRCLE_BRANCH}' >> $BASH_ENV
+          echo 'export IMAGE_NAME=gather_api' >> $BASH_ENV
       - run:
-          name: build and test
-          command: |
-            docker build -t remotecong/$IMAGE_NAME:$TAG .
-            docker run remotecong/$IMAGE_NAME:$TAG npm t
+        name: build and test
+        command: |
+          docker build -t remotecong/$IMAGE_NAME:$TAG .
+          docker run remotecong/$IMAGE_NAME:$TAG npm t
       - run:
-          name: publish docker image
-          command: |
-            echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
-            docker push remotecong/$IMAGE_NAME:$TAG
+        name: publish docker image
+        command: |
+          echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+          docker push remotecong/$IMAGE_NAME:$TAG
+  deploy:
+    branches:
+      ignore:
+        - master
+    steps:
+      - run:
+        name: deploy
+        command: |
+          ssh -o StrictHostKeyChecking=no rowsdower@gl.itch.space "/bin/bash ./deploy_app.sh remotecong/$IMAGE_NAME:$TAG stage_api"
 
