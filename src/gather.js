@@ -2,6 +2,7 @@ const Sentry = require("@sentry/node");
 const { getPhoneNumbers, getThatsThemUrl } = require("./thatsthem");
 const { getCachedJSON, cacheJSON } = require("./utils/cache.js");
 const getOwnerData = require("./owner-lookups/tulsa/assessor");
+const infoFilter = require("./utils/infoFilter.js");
 
 module.exports = async (address) => {
   if (!address) {
@@ -14,25 +15,18 @@ module.exports = async (address) => {
   }
 
   try {
-    const [ownerData, phoneData] = await Promise.all([
+    const [ownerData, thatsThemData] = await Promise.all([
       getOwnerData(address),
       getPhoneNumbers(address),
     ]);
 
-    const phones = phoneData.filter((p, i) => {
-      // WARN: assumes assessor name will be uppercase
-      const isOwner = p.name.toUpperCase().includes(ownerData.lastName);
-      return ownerData.livesThere ? isOwner : !isOwner;
-    });
-
     const results = {
-      ...ownerData,
-      phones,
       thatsThemUrl: getThatsThemUrl(address),
+      ...infoFilter(ownerData, thatsThemData),
     };
 
     //  not caching if thatsthem fails to load
-    if (phoneData && phoneData.length) {
+    if (thatsThemData.length) {
       cacheJSON(address, results);
     }
 

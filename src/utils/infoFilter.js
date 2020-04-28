@@ -4,11 +4,11 @@ function filterPhoneDataForName(phoneData, lastName) {
   const re = new RegExp(lastName + '$', 'i');
 
   return phoneData
-    .filter(({ name, phone }, i, arr) => phone && re.test(name))
+    .filter(({ name, number }, i, arr) => number && re.test(name))
     //  max numbers 2 for any search
     .slice(0, 2)
-    .map(({ phone, isMobile }) => ({
-      number: phone,
+    .map(({ number, isMobile }) => ({
+      number,
       type: isMobile ? "mobile" : "landline",
     }));
 }

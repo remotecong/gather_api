@@ -18,11 +18,11 @@ test("owner lives there and has number", () => {
   };
 
   const phoneData = [
-    {name: "Bill Smith", phone: "555-555-1234"},
-    {name: "Bill Smith", phone: "555-111-1234"},
-    {name: "Bill Smith", phone: "555-222-1234"},
-    {name: "Bill Smithers", phone: "555-666-1234"},
-    {name: "Bill Dauterive", phone: "555-555-1234"},
+    {name: "Bill Smith", number: "555-555-1234"},
+    {name: "Bill Smith", number: "555-111-1234"},
+    {name: "Bill Smith", number: "555-222-1234"},
+    {name: "Bill Smithers", number: "555-666-1234"},
+    {name: "Bill Dauterive", number: "555-555-1234"},
   ];
 
   const result = infoFilter(ownerData, phoneData);
@@ -41,8 +41,8 @@ test("owner lives there and no number", () => {
   };
 
   const phoneData = [
-    {name: "Bill Hill", phone: "555-555-1234"},
-    {name: "Bill Dauterive", phone: "555-555-1234"},
+    {name: "Bill Hill", number: "555-555-1234"},
+    {name: "Bill Dauterive", number: "555-555-1234"},
   ];
 
   const result = infoFilter(ownerData, phoneData);
@@ -59,10 +59,10 @@ test("renter and has number", () => {
   };
 
   const phoneData = [
-    {name: "Bill Smith", phone: "555-555-1234"},
-    {name: "Bill Hill", phone: "555-555-1234"},
-    {name: "Wanda Hill", phone: "555-322-5555", isMobile: 1},
-    {name: "Bill Dauterive", phone: "555-555-1234"},
+    {name: "Bill Smith", number: "555-555-1234"},
+    {name: "Bill Hill", number: "555-555-1234"},
+    {name: "Wanda Hill", number: "555-322-5555", isMobile: 1},
+    {name: "Bill Dauterive", number: "555-555-1234"},
   ];
 
   const result = infoFilter(ownerData, phoneData);
@@ -82,8 +82,8 @@ test("renter and no number", () => {
 
   const phoneData = [
     {name: "Bill Grambles"},
-    {name: "Bill Hill", phone: "555-555-1234"},
-    {name: "Bill Dauterive", phone: "555-555-1234"},
+    {name: "Bill Hill", number: "555-555-1234"},
+    {name: "Bill Dauterive", number: "555-555-1234"},
   ];
 
   const result = infoFilter(ownerData, phoneData);

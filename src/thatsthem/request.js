@@ -1,6 +1,5 @@
 const Sentry = require("@sentry/node");
 const axios = require("axios");
-const { getCachedJSON } = require("../utils/cache.js");
 const { getFetcher, resetIp, kill: killTor } = require("../utils/tor.js");
 
 let torAx;
@@ -71,24 +70,11 @@ async function fetch(url) {
 }
 
 async function getThatsThemData(url) {
-  try {
-    const cachedNumbers = await getCachedJSON(url);
-
-    if (cachedNumbers) {
-      return cachedNumbers;
-    }
-
-  } catch (err) {
-    Sentry.captureException(err);
-    throw new Error('thatsthem cache error');
-  }
-
   Sentry.configureScope((scope) => {
     scope.setTag("tt_url", url);
   });
 
-  const data = await fetch(url);
-  return data;
+  return await fetch(url);
 }
 
 module.exports = {
