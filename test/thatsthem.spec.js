@@ -49,6 +49,8 @@ test("good lookup finds numbers", (done) => {
     expect(results[0].name).toBe('Jara G Doe');
     expect(results[0].number).toBe('918-555-5838');
     expect(results[0].isMobile).toBeTruthy();
+    expect(results[1].name).toBe('Justin Doe');
+    expect(results[1].number).not.toBeDefined();
 
     done();
   });

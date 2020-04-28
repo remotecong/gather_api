@@ -17,6 +17,7 @@ function parseThatsThemData(html) {
     .reduce((coll, elem) => {
       const row = $(elem);
       const name = row.find("h2").text().trim();
+      let addedPerson = false;
 
       //  iterate over each phone number for a given resident
       row.find('span[itemprop="telephone"]').each((i, span) => {
@@ -29,8 +30,16 @@ function parseThatsThemData(html) {
             number,
             isMobile: link.attr("data-title") === "Mobile",
           });
+
+          addedPerson = true;
         }
       });
+
+      //  add renter even if no numbers found
+      if (!addedPerson) {
+        coll.push({ name });
+      }
+
       return coll;
     }, []);
 }
