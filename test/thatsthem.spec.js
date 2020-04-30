@@ -1,5 +1,6 @@
 jest.mock('../src/utils/cache.js');
-const { getThatsThemUrl, parseThatsThemData } = require("../src/thatsthem.js");
+const { getThatsThemUrl } = require("../src/thatsthem/url.js");
+const { parseThatsThemData } = require("../src/thatsthem/parse.js");
 const fs = require("fs");
 
 function getMock(name, fn) {
@@ -48,6 +49,20 @@ test("good lookup finds numbers", (done) => {
     expect(results[0].name).toBe('Jara G Doe');
     expect(results[0].number).toBe('918-555-5838');
     expect(results[0].isMobile).toBeTruthy();
+    expect(results[1].name).toBe('Justin Doe');
+    expect(results[1].number).not.toBeDefined();
+
+    done();
+  });
+});
+
+test("lookup doesn't have a match on thatsthem", (done) => {
+  getMock("not-found-thatsthem.html", (html) => {
+    let results;
+
+    expect(() => {
+      parseThatsThemData(html);
+    }).toThrow(/^thatsthem can't find address$/);
 
     done();
   });

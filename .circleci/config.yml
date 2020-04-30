@@ -1,19 +1,25 @@
 version: 2
 jobs:
   build:
-    docker:
-      - image: circleci/node:13.10-stretch
+    machine: true
     steps:
       - checkout
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
       - run:
-          name: install-deps
-          command: yarn
-      - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
-          paths:
-            - ./node_modules
+          name: setup env
+          command: |
+            echo 'export TAG=${CIRCLE_BRANCH}' >> $BASH_ENV
+            echo 'export IMAGE_NAME=gather_api' >> $BASH_ENV
       - run:
-          name: test
-          command: yarn test
+          name: build and test
+          command: |
+            docker build -t remotecong/$IMAGE_NAME:$TAG .
+            docker run remotecong/$IMAGE_NAME:$TAG npm t
+      - run:
+          name: publish docker image
+          command: |
+            echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+            docker push remotecong/$IMAGE_NAME:$TAG
+      - run:
+          name: deploy
+          command: |
+            ssh -o StrictHostKeyChecking=no rowsdower@gl.itch.space "/bin/bash ./deploy_api.sh remotecong/$IMAGE_NAME:$TAG stage_api"
