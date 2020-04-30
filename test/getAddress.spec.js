@@ -1,12 +1,18 @@
 const getAddress = require("../src/owner-lookups/tulsa/getAddress");
 
 test("does normal addresses", () => {
-  const addr = getAddress("601 W Chestnut St, Broken Arrow, 74013");
+  let addr = getAddress("601 W Chestnut St, Broken Arrow, 74013");
   //return {streetno, streetname, streettype, predirection};
   expect(addr.streetno).toBe("601");
   expect(addr.streetname).toBe("Chestnut");
   expect(addr.streettype).toBe("ST");
   expect(addr.predirection).toBe("W");
+
+  addr = getAddress("8238 S. Florence Pl. E.");
+  expect(addr.streetno).toBe("8238");
+  expect(addr.predirection).toBe("S");
+  expect(addr.streettype).toBe("PL");
+  expect(addr.streetname).toBe("Florence");
 });
 
 test("does two-worded street name addresses", () => {

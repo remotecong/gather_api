@@ -4,7 +4,7 @@ const { parseThatsThemData } = require("./parse.js");
 const { cacheJSON, getCachedJSON } = require("../utils/cache.js");
 const Sentry = require("@sentry/node");
 
-const cacheKey = (addr) => 'tt-' + address;
+const cacheKey = (addr) => 'tt-' + addr;
 
 async function getPhoneNumbers(address) {
   try {
