@@ -7,7 +7,7 @@ jobs:
       - run:
           name: setup env
           command: |
-            echo 'export TAG=${CIRCLE_BRANCH}' >> $BASH_ENV
+            echo 'export TAG=${CIRCLE_SHA1}' >> $BASH_ENV
             echo 'export IMAGE_NAME=gather_api' >> $BASH_ENV
       - run:
           name: build and test
