@@ -4,7 +4,13 @@ const { getCachedJSON, cacheJSON } = require("./utils/cache.js");
 const getOwnerData = require("./owner-lookups/tulsa/assessor");
 const infoFilter = require("./utils/infoFilter.js");
 
-module.exports = async (address) => {
+function timeout(seconds) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject(new Error("timeout error")), seconds << 10);
+  });
+}
+
+module.exports = async address => {
   if (!address) {
     return { error: "Missing address" };
   }
@@ -15,14 +21,14 @@ module.exports = async (address) => {
   }
 
   try {
-    const [ownerData, thatsThemData] = await Promise.all([
-      getOwnerData(address),
-      getPhoneNumbers(address),
+    const [ownerData, thatsThemData] = await Promise.race([
+      Promise.all([getOwnerData(address), getPhoneNumbers(address)]),
+      timeout(10)
     ]);
 
     const results = {
       thatsThemUrl: getThatsThemUrl(address),
-      ...infoFilter(ownerData, thatsThemData),
+      ...infoFilter(ownerData, thatsThemData)
     };
 
     //  not caching if thatsthem fails to load
@@ -32,8 +38,8 @@ module.exports = async (address) => {
 
     return results;
   } catch (err) {
-    const captureError = new Error(err.message + ' ' + address);
-    Sentry.withScope((scope) => {
+    const captureError = new Error(err.message + " " + address);
+    Sentry.withScope(scope => {
       scope.setTag("query", address);
       Sentry.captureException(captureError);
     });
