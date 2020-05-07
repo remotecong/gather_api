@@ -23,7 +23,7 @@ module.exports = async address => {
   try {
     const [ownerData, thatsThemData] = await Promise.race([
       Promise.all([getOwnerData(address), getPhoneNumbers(address)]),
-      timeout(10)
+      timeout(14)
     ]);
 
     const results = {
