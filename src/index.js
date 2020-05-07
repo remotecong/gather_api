@@ -2,7 +2,6 @@ const http = require("http");
 const { parse } = require("url");
 const gather = require("./gather");
 const Sentry = require("@sentry/node");
-const bluebird = require("bluebird");
 
 Sentry.init({
   dsn: process.env.SENTRY_URL,
