@@ -5,7 +5,7 @@ const Sentry = require("@sentry/node");
 
 Sentry.init({
   dsn: process.env.SENTRY_URL,
-  environment: process.env.NODE_ENV || "dev",
+  environment: process.env.NODE_ENV || "dev"
 });
 
 function getIp(req) {
@@ -29,7 +29,7 @@ http
 
       const query = parse(req.url, true).query;
 
-      Sentry.configureScope((scope) => {
+      Sentry.configureScope(scope => {
         scope.clear();
         scope.setTag("ip", getIp(req));
         scope.setTag("ua", req.headers["user-agent"]);
@@ -52,12 +52,11 @@ http
       const data = await gather(query.address);
 
       res.writeHead(200, {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       });
 
       res.end(JSON.stringify(data));
     } catch (err) {
-
       console.log(err);
       Sentry.captureException(err);
 
