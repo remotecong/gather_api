@@ -2,7 +2,7 @@ const cheerio = require("cheerio");
 
 function parseThatsThemData(html) {
   if (/<b>Fatal error<\/b>/.test(html)) {
-    throw new Error('thatsthem php error thrown');
+    throw new Error("thatsthem php error thrown");
   }
 
   if (/We did not find any results for your query/.test(html)) {
@@ -24,11 +24,11 @@ function parseThatsThemData(html) {
         const link = $(span).parent();
         const number = link.text().trim();
 
-        if (!coll.some((p) => p.number === number)) {
+        if (!coll.some(p => p.number === number)) {
           coll.push({
             name,
             number,
-            isMobile: link.attr("data-title") === "Mobile",
+            isMobile: link.attr("data-title") === "Mobile"
           });
 
           addedPerson = true;
@@ -45,6 +45,5 @@ function parseThatsThemData(html) {
 }
 
 module.exports = {
-  parseThatsThemData,
+  parseThatsThemData
 };
-

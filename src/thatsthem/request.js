@@ -1,6 +1,7 @@
 const Sentry = require("@sentry/node");
 const axios = require("axios");
 const { getFetcher, resetIp, kill: killTor } = require("../utils/tor.js");
+const { USER_AGENT } = require("../utils/config.js");
 
 let torAx;
 
@@ -9,8 +10,8 @@ let waitUntil = 0;
 
 const defaultAxiosOptions = {
   headers: {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:75.0) Gecko/20100101 Firefox/75.0",
-  },
+    "User-Agent": USER_AGENT
+  }
 };
 
 //  local ip requests
@@ -25,20 +26,21 @@ async function getTorax() {
 }
 
 function isRateLimited(response) {
-  return response.status === 302 ||
+  return (
+    response.status === 302 ||
     response.headers["location"] === "/?rl=true" ||
-    /exceeded the maximum number of queries|<b>Fatal error<\/b>/
-      .test(response.data);
+    /exceeded the maximum number of queries|<b>Fatal error<\/b>/.test(response.data)
+  );
 }
 
 async function fetch(url) {
-  let ax = axios;
+  let ax = localAxios;
 
   if (waitUntil) {
     //  if still same day we received RL, use diff IP
     if (Date.now() < waitUntil) {
       ax = await getTorax();
-    // else use local IP again
+      // else use local IP again
     } else {
       waitUntil = 0;
       killTor();
@@ -54,7 +56,7 @@ async function fetch(url) {
       await resetIp();
     } else {
       //  we need to try tor for a day
-      waitUntil = Date.now() + (1000 * 60 * 60 * 24);
+      waitUntil = Date.now() + 1000 * 60 * 60 * 24;
       ax = await getTorax();
     }
 
@@ -70,7 +72,7 @@ async function fetch(url) {
 }
 
 async function getThatsThemData(url) {
-  Sentry.configureScope((scope) => {
+  Sentry.configureScope(scope => {
     scope.setTag("tt_url", url);
   });
 
@@ -78,6 +80,5 @@ async function getThatsThemData(url) {
 }
 
 module.exports = {
-  getThatsThemData,
+  getThatsThemData
 };
-

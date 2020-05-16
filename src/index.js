@@ -34,6 +34,7 @@ http
         scope.setTag("ip", getIp(req));
         scope.setTag("ua", req.headers["user-agent"]);
         scope.setTag("query", query.address || "NO ADDRESS");
+        scope.setTag("app", req.headers["x-app"] || "gather-v0");
       });
 
       if (req.method === "OPTIONS") {
@@ -57,7 +58,6 @@ http
 
       res.end(JSON.stringify(data));
     } catch (err) {
-      console.log(err);
       Sentry.captureException(err);
 
       res.writeHead(500);
