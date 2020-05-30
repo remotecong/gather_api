@@ -48,7 +48,12 @@ async function fetch(url) {
     }
   }
 
-  let response = await ax.get(url);
+  let response;
+  try {
+    response = await ax.get(url);
+  } catch (err) {
+    response = err.response;
+  }
 
   if (isRateLimited(response)) {
     //  retry one more time with new ip
@@ -63,7 +68,11 @@ async function fetch(url) {
     }
 
     //  last try
-    response = await ax.get(url);
+    try {
+      response = await ax.get(url);
+    } catch (err) {
+      response = err.response;
+    }
 
     if (isRateLimited(response)) {
       throw new Error("multiple thatsthem rate limits raised");
