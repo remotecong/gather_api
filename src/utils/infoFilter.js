@@ -3,6 +3,15 @@ module.exports = {
   filterPhoneDataForName
 };
 
+function sortTulsaPhoneDataToTop({ number: a }, { number: b }) {
+  const aIsTulsa = a.startsWith("918-");
+  const bIsTulsa = b.startsWith("918-");
+  if (aIsTulsa === bIsTulsa) {
+    return 0;
+  }
+  return aIsTulsa && !bIsTulsa ? -1 : 1;
+}
+
 function filterPhoneDataForName(phoneData, lastName) {
   const re = new RegExp(lastName + "( jn?r| sn?r| ii| iii)?$", "i");
 
@@ -10,11 +19,12 @@ function filterPhoneDataForName(phoneData, lastName) {
     phoneData
       .filter(({ name, number }) => number && re.test(name))
       //  max numbers 2 for any search
-      .slice(0, 2)
       .map(({ number, isMobile }) => ({
         number,
         type: isMobile ? "mobile" : "landline"
       }))
+      .sort(sortTulsaPhoneDataToTop)
+      .slice(0, 2)
   );
 }
 

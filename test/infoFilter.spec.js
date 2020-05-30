@@ -139,3 +139,17 @@ test("finds phone number for ones with suffixes after their last name", () => {
   expect(result.name).toBe("III");
   expect(result.phones.length).toBe(1);
 });
+
+test("sorts 918- numbers to top", () => {
+  const phoneData = [
+    { name: "Bill Hill", number: "417-000-0000" },
+    { name: "Brenda Hill", number: "405-000-0000" },
+    { name: "Wanda Hill", number: "918-322-5555", isMobile: 1 },
+    { name: "Wanda Hill", number: "919-322-5555", isMobile: 1 },
+    { name: "Wilma Hill", number: "918-321-5556" }
+  ];
+  const result = infoFilter({ ownerName: "HILL", livesThere: 1, lastName: "Hill" }, phoneData);
+  expect(result.phones.length).toBe(2);
+  expect(result.phones[0].number).toMatch(/^918-/);
+  expect(result.phones[1].number).toMatch(/^918-/);
+});
