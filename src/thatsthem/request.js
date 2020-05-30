@@ -28,6 +28,7 @@ async function getTorax() {
 function isRateLimited(response) {
   return (
     response.status === 302 ||
+    response.status === 403 ||
     response.headers["location"] === "/?rl=true" ||
     /exceeded the maximum number of queries|<b>Fatal error<\/b>/.test(response.data)
   );
@@ -56,7 +57,8 @@ async function fetch(url) {
       await resetIp();
     } else {
       //  we need to try tor for a day
-      waitUntil = Date.now() + 1000 * 60 * 60 * 24;
+      // prettier-ignore
+      waitUntil = Date.now() + (1000 * 60 * 60 * 24);
       ax = await getTorax();
     }
 

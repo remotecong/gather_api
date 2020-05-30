@@ -4,8 +4,8 @@ const getAssessorValues = require("./getAddress.js");
 const axios = require("axios");
 const { default: formurlencoded } = require("form-urlencoded");
 const parseOwnerInfo = require("./assessor-parser.js");
-const { cacheJSON, getCachedJSON } = require("../utils/cache.js");
-const { USER_AGENT } = require("../utils/config.js");
+const { cacheJSON, getCachedJSON } = require("../../utils/cache.js");
+const { USER_AGENT } = require("../../utils/config.js");
 
 const ASSESSOR_URL = "/assessor-property-view.php";
 
@@ -75,6 +75,8 @@ async function getOwnerData(address) {
     const ownerInfo = parseOwnerInfo($);
     //  keeping the owner info cached in case thatsthem fails later
     cacheJSON(cacheKey, ownerInfo);
+    //  eslint-disable-next-line no-console
+    console.log("assessor loaded data:", address);
     return ownerInfo;
   } catch (err) {
     Sentry.withScope(scope => {

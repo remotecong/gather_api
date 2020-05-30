@@ -58,6 +58,7 @@ http
 
       res.end(JSON.stringify(data));
     } catch (err) {
+      console.log(err);
       Sentry.captureException(err);
 
       res.writeHead(500);

@@ -20,6 +20,8 @@ async function getPhoneNumbers(address) {
 
   const numbers = parseThatsThemData(html);
   cacheJSON(cacheKey, numbers);
+  //  eslint-disable-next-line no-console
+  console.log("thatsthem loaded data:", address);
   return numbers;
 }
 
