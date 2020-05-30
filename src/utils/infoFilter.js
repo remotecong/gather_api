@@ -1,7 +1,10 @@
-module.exports = infoFilter;
+module.exports = {
+  infoFilter,
+  filterPhoneDataForName
+};
 
 function filterPhoneDataForName(phoneData, lastName) {
-  const re = new RegExp(lastName + "$", "i");
+  const re = new RegExp(lastName + "( jn?r| sn?r| ii| iii)?$", "i");
 
   return (
     phoneData

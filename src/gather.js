@@ -2,7 +2,7 @@ const Sentry = require("@sentry/node");
 const { getPhoneNumbers, getThatsThemUrl } = require("./thatsthem");
 const { getCachedJSON, cacheJSON } = require("./utils/cache.js");
 const getOwnerData = require("./owner-lookups/tulsa/assessor");
-const infoFilter = require("./utils/infoFilter.js");
+const { infoFilter } = require("./utils/infoFilter.js");
 
 function timeout(seconds) {
   return new Promise((resolve, reject) => {
