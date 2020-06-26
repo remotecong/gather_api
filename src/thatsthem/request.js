@@ -10,8 +10,8 @@ let waitUntil = 0;
 
 const defaultAxiosOptions = {
   headers: {
-    "User-Agent": USER_AGENT
-  }
+    "User-Agent": USER_AGENT,
+  },
 };
 
 //  local ip requests
@@ -56,6 +56,7 @@ async function fetch(url) {
   }
 
   if (isRateLimited(response)) {
+    console.log("thatsthem rate limit hit");
     //  retry one more time with new ip
     if (waitUntil) {
       //  we were already trying tor
@@ -75,6 +76,7 @@ async function fetch(url) {
     }
 
     if (isRateLimited(response)) {
+      console.error("thatsthem multiple rate limits hit");
       throw new Error("multiple thatsthem rate limits raised");
     }
   }
@@ -83,7 +85,7 @@ async function fetch(url) {
 }
 
 async function getThatsThemData(url) {
-  Sentry.configureScope(scope => {
+  Sentry.configureScope((scope) => {
     scope.setTag("tt_url", url);
   });
 
@@ -91,5 +93,5 @@ async function getThatsThemData(url) {
 }
 
 module.exports = {
-  getThatsThemData
+  getThatsThemData,
 };
