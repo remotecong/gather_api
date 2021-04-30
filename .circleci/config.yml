@@ -19,7 +19,8 @@ jobs:
           command: |
             echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
             docker push remotecong/$IMAGE_NAME:$TAG
-      - run:
-          name: deploy
-          command: |
-            ssh -o StrictHostKeyChecking=no rowsdower@gl.itch.space "/bin/bash ./deploy_api.sh remotecong/$IMAGE_NAME:$TAG stage_api"
+
+#      - run:
+#          name: deploy
+#          command: |
+#            ssh -o StrictHostKeyChecking=no rowsdower@gl.itch.space "/bin/bash ./deploy_api.sh remotecong/$IMAGE_NAME:$TAG stage_api"
