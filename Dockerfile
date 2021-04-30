@@ -8,4 +8,5 @@ RUN yarn
 COPY . .
 EXPOSE 3000
 ENV NODE_ENV production
+RUN echo "ExitNodes {US}" > /etc/tor/torrc
 CMD yarn start

@@ -25,6 +25,7 @@ module.exports = async address => {
       Promise.all([getOwnerData(address), getPhoneNumbers(address)]),
       timeout(14)
     ]);
+    console.log("GATHER: searching", address);
 
     const results = {
       thatsThemUrl: getThatsThemUrl(address),

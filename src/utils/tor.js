@@ -7,11 +7,13 @@ const httpsAgent = new SocksProxyAgent(process.env.TOR_SOCKS_PROXY_ADDRESS || "s
 let isFirstRequest = true;
 
 async function resetIp() {
+  console.log("TOR: restarting");
   return await Tor.restart();
 }
 
 async function buildFetcher(opts) {
   if (isFirstRequest) {
+    console.log("TOR: starting for first time");
     isFirstRequest = false;
     await Tor.start();
   }
