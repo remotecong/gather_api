@@ -1,7 +1,8 @@
 FROM node:alpine3.11
 RUN yarn global add nodemon && \
       apk -U --no-progress update && \
-      apk -U --no-progress add tor
+      apk -U --no-progress add tor && \
+      echo "ExitNodes {us}" > /etc/torrc
 WORKDIR /code/
 COPY package.json yarn.lock ./
 RUN yarn

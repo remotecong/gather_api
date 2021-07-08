@@ -1,11 +1,10 @@
-const http = require("http");
-const { parse } = require("url");
+const fastify = require("fastify")({ logger: true });
 const gather = require("./gather");
 const Sentry = require("@sentry/node");
 
 Sentry.init({
   dsn: process.env.SENTRY_URL,
-  environment: process.env.NODE_ENV || "dev"
+  environment: process.env.NODE_ENV || "dev",
 });
 
 function getIp(req) {
@@ -19,49 +18,62 @@ function getIp(req) {
   } catch (ignore) {}
 }
 
-http
-  .createServer(async (req, res) => {
+fastify.register(require("fastify-cors"), {
+  origin: "*",
+  methods: ["GET", "OPTIONS", "HEAD", "POST"],
+  allowedHeaders: "*",
+});
+
+fastify.get("/tulsa", async (request, reply) => {
+  const { address } = request.query;
+  if (address) {
     try {
-      res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
-      res.setHeader("Access-Control-Request-Method", "*");
-      res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET");
-      res.setHeader("Access-Control-Allow-Headers", "*");
-
-      const query = parse(req.url, true).query;
-
-      Sentry.configureScope(scope => {
-        scope.clear();
-        scope.setTag("ip", getIp(req));
-        scope.setTag("ua", req.headers["user-agent"]);
-        scope.setTag("query", query.address || "NO ADDRESS");
-      });
-
-      if (req.method === "OPTIONS") {
-        res.writeHead(200);
-        res.end();
-        return;
-      }
-
-      if (!query || !query.address) {
-        Sentry.captureException(new Error("no query submitted"));
-        res.writeHead(404);
-        res.end("hi");
-        return;
-      }
-
-      const data = await gather(query.address);
-
-      res.writeHead(200, {
-        "Content-Type": "application/json"
-      });
-
-      res.end(JSON.stringify(data));
+      return await gather(address);
     } catch (err) {
-      console.log(err);
-      Sentry.captureException(err);
-
-      res.writeHead(500);
-      res.end("{}");
+      return { error: err.toString() };
     }
-  })
-  .listen(process.env.PORT || 3000);
+  }
+  return { hello: "world" };
+});
+
+fastify.post("/tulsa", async (request, reply) => {
+  if (request.body) {
+    const addresses = JSON.parse(request.body);
+    if (addresses.length) {
+      const results = [];
+      for (const a of addresses) {
+        try {
+          const result = await gather(a);
+          results.push([a, result]);
+        } catch (err) {
+          results.push([a, { error: err }]);
+        }
+        const percentComplete = (results.length / addresses.length) * 100;
+        const bar = Array(10)
+          .fill("_")
+          .map((_, i) => ((i + 1) * 10 <= percentComplete ? "*" : "_"))
+          .join("");
+        console.log("%s %d%", bar, percentComplete);
+      }
+      return results;
+    }
+  } else {
+    return { error: "no body" };
+  }
+});
+
+fastify.setNotFoundHandler(async (request, reply) => {
+  return { idk: true };
+});
+
+async function start() {
+  try {
+    await fastify.listen(process.env.PORT || 3000, "0.0.0.0");
+    fastify.log.info(`gather_api ok :: ${fastify.server.address().port}`);
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+}
+
+start();

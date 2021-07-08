@@ -4,6 +4,8 @@ const getAssessorValues = require("./getAddress.js");
 const axios = require("axios");
 const { default: formurlencoded } = require("form-urlencoded");
 const parseOwnerInfo = require("./assessor-parser.js");
+const { cacheJSON, getCachedJSON } = require("../../utils/cache.js");
+const { USER_AGENT } = require("../../utils/config.js");
 
 const ASSESSOR_URL = "/assessor-property-view.php";
 
@@ -11,20 +13,26 @@ const assessorAxios = axios.create({
   baseURL: "https://assessor.tulsacounty.org/",
   timeout: 9999,
   headers: {
-    "User-Agent":
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:74.0) Gecko/20100101 Firefox/74.0",
-  },
+    "User-Agent": USER_AGENT
+  }
 });
 
 async function getOwnerData(address) {
   try {
+    const cacheKey = "tul-assessor" + address;
+    const assessorCache = await getCachedJSON(cacheKey);
+
+    if (assessorCache) {
+      return assessorCache;
+    }
+
     //  try to load form data first, otherwise we don't need to request
     const assessorFormData = formurlencoded(getAssessorValues(address));
 
     let res = await assessorAxios.get(ASSESSOR_URL);
 
     if (res.status >= 400) {
-      throw Error(res.statusText);
+      throw new Error(res.statusText);
     }
 
     const phpSessionCookies = res.headers["set-cookie"][0].split(" ")[0].trim();
@@ -36,11 +44,11 @@ async function getOwnerData(address) {
     res = await assessorAxios({
       url: ASSESSOR_URL,
       headers: {
-        cookie: phpSessionCookies,
+        cookie: phpSessionCookies
       },
       method: "post",
       data: assessorFormData,
-      withCredentials: true,
+      withCredentials: true
     });
 
     let $ = cheerio.load(res.data);
@@ -54,14 +62,25 @@ async function getOwnerData(address) {
       $ = cheerio.load(res.data);
     }
 
+    //  message found on 2020-05-06 and was indicative that the property search simply
+    //  serves the initial property search page upon submitting search form
+    if (/We are currently experiencing intermittent issues with our web site/.test(res.data)) {
+      throw new Error("assessor can't lookup properties right now");
+    }
+
     if (/No properties were found/.test(res.data)) {
       throw new Error("address not found in county assessor");
     }
 
-    return parseOwnerInfo($);
+    const ownerInfo = parseOwnerInfo($);
+    //  keeping the owner info cached in case thatsthem fails later
+    cacheJSON(cacheKey, ownerInfo);
+    //  eslint-disable-next-line no-console
+    console.log("assessor loaded data:", address);
+    return ownerInfo;
   } catch (err) {
-    Sentry.withScope((scope) => {
-      const captureException = new Error(err.message + ' ' + address);
+    Sentry.withScope(scope => {
+      const captureException = new Error(err.message + " " + address);
       scope.setTag("assessor-raw-address", address);
       Sentry.captureException(captureException);
     });

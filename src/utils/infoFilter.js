@@ -1,16 +1,31 @@
-module.exports = infoFilter;
+module.exports = {
+  infoFilter,
+  filterPhoneDataForName
+};
+
+function sortTulsaPhoneDataToTop({ number: a }, { number: b }) {
+  const aIsTulsa = a.startsWith("918-");
+  const bIsTulsa = b.startsWith("918-");
+  if (aIsTulsa === bIsTulsa) {
+    return 0;
+  }
+  return aIsTulsa && !bIsTulsa ? -1 : 1;
+}
 
 function filterPhoneDataForName(phoneData, lastName) {
-  const re = new RegExp(lastName + '$', 'i');
+  const re = new RegExp(lastName + "( jn?r| sn?r| ii| iii)?$", "i");
 
-  return phoneData
-    .filter(({ name, number }, i, arr) => number && re.test(name))
-    //  max numbers 2 for any search
-    .slice(0, 2)
-    .map(({ number, isMobile }) => ({
-      number,
-      type: isMobile ? "mobile" : "landline",
-    }));
+  return (
+    phoneData
+      .filter(({ name, number }) => number && re.test(name))
+      //  max numbers 2 for any search
+      .map(({ number, isMobile }) => ({
+        number,
+        type: isMobile ? "mobile" : "landline"
+      }))
+      .sort(sortTulsaPhoneDataToTop)
+      .slice(0, 2)
+  );
 }
 
 function infoFilter(ownerData, thatsThemData) {
@@ -19,9 +34,9 @@ function infoFilter(ownerData, thatsThemData) {
     return {
       name: ownerData.ownerName,
       livesThere: ownerData.livesThere,
-      phones: filterPhoneDataForName(thatsThemData, ownerData.lastName),
+      phones: filterPhoneDataForName(thatsThemData, ownerData.lastName)
     };
-  } 
+  }
 
   const renterName = thatsThemData.find(({ name }) => !name.toUpperCase().includes(ownerData.lastName));
 
@@ -32,7 +47,7 @@ function infoFilter(ownerData, thatsThemData) {
     return {
       name: renterName.name,
       livesThere: true,
-      phones: filterPhoneDataForName(thatsThemData, lastName),
+      phones: filterPhoneDataForName(thatsThemData, lastName)
     };
   }
 
@@ -44,6 +59,6 @@ function infoFilter(ownerData, thatsThemData) {
     name: ownerData.ownerName,
     phones: [],
     livesThere: false,
-    orCurrentResident: true,
+    orCurrentResident: true
   };
 }
